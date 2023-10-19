@@ -1,12 +1,24 @@
 from django.contrib.auth.models import User, Group
+from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from main.models import CompanyDoc, Company, MyUser
+from main.models import CompanyDoc, Company, CustomUser
+from djoser.serializers import UserCreateSerializer
+
+
+class CustomUserCreateSerializer(UserCreateSerializer):
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+
+
+    class Meta(UserCreateSerializer.Meta):
+        fields = ('first_name', 'last_name', 'email', 'password')
 
 
 class UserSerializer(ModelSerializer):
     class Meta:
-        model = User
+        model = CustomUser
         fields = ('username', 'email', "first_name", "last_name")
 
 

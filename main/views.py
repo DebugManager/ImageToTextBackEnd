@@ -5,15 +5,17 @@ from rest_framework import status, generics, permissions
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from main.models import CompanyDoc, Company, MyUser
+from main.models import CompanyDoc, Company, CustomUser
 from main.serializers import CompanyDocSerializer, CompanySerializer, UserSerializer, GroupSerializer
 from rest_framework.permissions import IsAuthenticated
+
 
 
 class MainList(generics.ListCreateAPIView):
     queryset = CompanyDoc.objects.all()
     serializer_class = CompanyDocSerializer
     permission_classes = (IsAuthenticated,)
+
 
 class MainDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = CompanyDoc.objects.all()
@@ -31,11 +33,10 @@ class CompanyDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class UserList(generics.ListCreateAPIView):
-    queryset = MyUser.objects.all()
+    queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = MyUser.objects.all()
+    queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-

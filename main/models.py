@@ -1,10 +1,12 @@
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import User, AbstractUser, PermissionsMixin
 from django.db import models
 
-
+from .managers import CustomUserManager
 # User
 # Qwerty1234!
 # Create your models here.
+
 
 class Company(models.Model):
     class Meta:
@@ -14,14 +16,25 @@ class Company(models.Model):
     last_upd = models.DateTimeField(auto_now=True)
 
 
-class MyUser(AbstractBaseUser):
-    username = models.EmailField()
-    package = models.IntegerField()
-    amount = models.IntegerField()
-    created_date = models.DateTimeField(auto_now_add=True)
-    paid_date = models.DateTimeField()
-    method = models.CharField(max_length=50)
-    status = models.IntegerField()
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    username = None
+
+    email = models.EmailField(unique=True)
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+    is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
+
+    objects = CustomUserManager()
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    # package = models.IntegerField()
+    # amount = models.IntegerField()
+    # created_date = models.DateTimeField(auto_now_add=True)
+    # paid_date = models.DateTimeField()
+    # method = models.CharField(max_length=50)
+    # status = models.IntegerField()
+    # USERNAME_FIELD = 'email'
 
 
 class CompanyDoc(models.Model):
@@ -31,3 +44,6 @@ class CompanyDoc(models.Model):
     number_of_pg = models.IntegerField()
     time_added = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField()
+
+
+# class UserManager(models.UserManager)

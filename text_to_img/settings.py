@@ -111,7 +111,15 @@ REST_FRAMEWORK = {
     ]
 }
 
+DJOSER = {
+    'LOGIN_FIELD': 'email',
+    'SERIALIZERS': {
+         'user_create': 'main.serializers.CustomUserCreateSerializer'
+    }
+}
 
+
+AUTH_USER_MODEL = 'main.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
