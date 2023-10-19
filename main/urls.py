@@ -1,9 +1,7 @@
 from django.urls import path, include, re_path
 
 from main import views
-from main.views import MainList, MainDetail, UserList
-
-
+from main.views import UserList
 
 urlpatterns = [
     path('v1/main/', views.MainList.as_view()),
@@ -12,4 +10,3 @@ urlpatterns = [
     path('v1/auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
 ]
-

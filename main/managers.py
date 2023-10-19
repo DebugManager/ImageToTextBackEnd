@@ -8,9 +8,6 @@ class CustomUserManager(BaseUserManager):
     """
 
     def create_user(self, email, password, **extra_fields):
-        """
-        Create and save a user with the given email and password.
-        """
         if not email:
             raise ValueError("The Email must be set")
         email = self.normalize_email(email)

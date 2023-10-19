@@ -1,14 +1,12 @@
 from django.contrib import admin
 
-# Register your models here.
-from django.contrib.auth.models import User
-
 from main.models import CompanyDoc, CustomUser, Company
 
 
 @admin.register(CustomUser)
 class MyUser(admin.ModelAdmin):
     pass
+
 
 @admin.register(Company)
 class Company(admin.ModelAdmin):

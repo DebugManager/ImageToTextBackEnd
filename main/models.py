@@ -3,14 +3,12 @@ from django.contrib.auth.models import User, AbstractUser, PermissionsMixin
 from django.db import models
 
 from .managers import CustomUserManager
-# User
-# Qwerty1234!
-# Create your models here.
 
 
 class Company(models.Model):
     class Meta:
         verbose_name_plural = 'Companies'
+
     name = models.CharField(max_length=255)
     total_channels = models.IntegerField()
     last_upd = models.DateTimeField(auto_now=True)
@@ -44,6 +42,3 @@ class CompanyDoc(models.Model):
     number_of_pg = models.IntegerField()
     time_added = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField()
-
-
-# class UserManager(models.UserManager)

@@ -11,7 +11,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     last_name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
 
-
     class Meta(UserCreateSerializer.Meta):
         fields = ('first_name', 'last_name', 'email', 'password')
 
