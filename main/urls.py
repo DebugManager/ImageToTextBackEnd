@@ -1,18 +1,15 @@
-from django.urls import path
-
-from rest_framework.routers import SimpleRouter
+from django.urls import path, include, re_path
 
 from main import views
-from main.views import MainList, MainDetail
+from main.views import MainList, MainDetail, UserList
 
-router = SimpleRouter()
 
-# router.register(r'mainlist', MainList)
-# router.register(r'maindetail', MainDetail)
 
 urlpatterns = [
-    path('main/', views.MainList.as_view()),
-    path('main/<int:pk>/', views.MainDetail.as_view()),
+    path('v1/main/', views.MainList.as_view()),
+    path('v1/main/<int:pk>/', views.MainDetail.as_view()),
+    path('v1/users/', UserList.as_view()),
+    path('v1/auth/', include('djoser.urls')),
+    re_path(r'^auth/', include('djoser.urls.authtoken')),
 ]
 
-urlpatterns += router.urls

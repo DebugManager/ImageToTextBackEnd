@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
 
     'main'
 ]
@@ -98,6 +101,16 @@ DATABASES = {
         default='postgres://postgress:YoV5cKgLlPu6WsJdCS4E3b4ZSGMMo770@dpg-cknq7qprfc9c73ee3c5g-a.frankfurt-postgres.render.com/text_to_img',
     )
 }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
+    ]
+}
+
 
 
 # Password validation

@@ -9,7 +9,6 @@ from django.db import models
 class Company(models.Model):
     class Meta:
         verbose_name_plural = 'Companies'
-
     name = models.CharField(max_length=255)
     total_channels = models.IntegerField()
     last_upd = models.DateTimeField(auto_now=True)
