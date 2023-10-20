@@ -8,13 +8,13 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 class MainList(generics.ListCreateAPIView):
     queryset = CompanyDoc.objects.all()
     serializer_class = CompanyDocSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
 
 class MainDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = CompanyDoc.objects.all()
     serializer_class = CompanyDocSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
 
 class PlanList(generics.ListCreateAPIView):
