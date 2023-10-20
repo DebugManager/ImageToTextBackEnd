@@ -15,6 +15,8 @@ https://pdf-to-txt-back.onrender.com/v1/main/  - create new
 https://pdf-to-txt-back.onrender.com/auth/token/login/ - log in and get token
 https://pdf-to-txt-back.onrender.com/auth/token/logout/ - log out
 https://pdf-to-txt-back.onrender.com/v1/auth/users/ - sign up (required username, password)
+https://pdf-to-txt-back.onrender.com/v1/auth/users/reset_password/ - reset password (required ‘email’)
+https://pdf-to-txt-back.onrender.com/v1/users/reset_password_confirm/ - reset password confirm (required ‘uid’, ‘token’, ‘new_password’)
 ####Put/Patch
 https://pdf-to-txt-back.onrender.com/v1/main/<id>/  - edit CompanyDoc
 ####Delete

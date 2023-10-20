@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import User, AbstractUser, PermissionsMixin
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 from .managers import CustomUserManager
 
@@ -12,6 +13,20 @@ class Company(models.Model):
     name = models.CharField(max_length=255)
     total_channels = models.IntegerField()
     last_upd = models.DateTimeField(auto_now=True)
+
+
+class Option(models.Model):
+    name = models.CharField(max_length=40, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Plan(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=100)
+    price = models.IntegerField()
+    options = models.ManyToManyField(Option)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -27,6 +42,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    # current_plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     # package = models.IntegerField()
     # amount = models.IntegerField()
     # created_date = models.DateTimeField(auto_now_add=True)

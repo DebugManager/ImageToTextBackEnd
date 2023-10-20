@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from main.models import CompanyDoc, Company, CustomUser
+from main.models import CompanyDoc, Company, CustomUser, Plan
 from djoser.serializers import UserCreateSerializer
 
 
@@ -38,7 +38,12 @@ class CompanySerializer(ModelSerializer):
         model = Company
         fields = '__all__'
 
-#
+
+class PlanSerializer(ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = '__all__'
+
 # class UserSerializer(ModelSerializer):
 #     class Meta:
 #         model = MyUser
