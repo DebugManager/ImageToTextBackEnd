@@ -11,18 +11,21 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+import smtplib
 
 import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p73mfukyfjm=6c91u23d$arnnqi)v#9105y)fr%2$u(lg)3-7r'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
@@ -82,7 +85,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'text_to_img.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -100,7 +102,7 @@ WSGI_APPLICATION = 'text_to_img.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         # Feel free to alter this value to suit your needs.
-        default='postgres://postgress:YoV5cKgLlPu6WsJdCS4E3b4ZSGMMo770@dpg-cknq7qprfc9c73ee3c5g-a.frankfurt-postgres.render.com/text_to_img',
+        default=os.environ.get('DB_LINK'),
     )
 }
 
@@ -115,11 +117,12 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
+    "ACTIVATION_URL": "v1/auth/activate/{uid}/{token}",
+    'PASSWORD_RESET_CONFIRM_URL': 'v1/auth/users/reset_password_confirm/{uid}/{token}',
     'SERIALIZERS': {
-         'user_create': 'main.serializers.CustomUserCreateSerializer'
+        'user_create': 'main.serializers.CustomUserCreateSerializer'
     }
 }
-
 
 AUTH_USER_MODEL = 'main.CustomUser'
 
@@ -141,7 +144,6 @@ AUTH_USER_MODEL = 'main.CustomUser'
 #     },
 # ]
 
-PASSWORD_RESET_CONFIRM_URL = 'google.com'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -154,7 +156,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -165,8 +166,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_HOST = 'localhost'
-# EMAIL_PORT = 25
-# EMAIL_HOST_USER = ''
-# EMAIL_HOST_PASSWORD = ''
+# Email settings
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # for output in console
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS')
