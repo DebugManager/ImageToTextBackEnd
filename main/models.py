@@ -26,7 +26,16 @@ class Plan(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=100)
     price = models.IntegerField()
-    options = models.ManyToManyField(Option)
+    type = models.CharField(max_length=50, default='Mounth')
+    # options = models.ManyToManyField(Option)
+    option1 = models.CharField(max_length=50, blank=True)
+    option2 = models.CharField(max_length=50, blank=True)
+    option3 = models.CharField(max_length=50, blank=True)
+    option4 = models.CharField(max_length=50, blank=True)
+    option5 = models.CharField(max_length=50, blank=True)
+    option6 = models.CharField(max_length=50, blank=True)
+    option7 = models.CharField(max_length=50, blank=True)
+    option8 = models.CharField(max_length=50, blank=True)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -42,9 +51,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    # address_line1 = models.CharField(max_length=255, blank=True)
-    # city = models.
-    # current_plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+    address_line1 = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=50, blank=True)
+    zip_code = models.IntegerField(null=True)
+    country = models.CharField(max_length=100, blank=True)
+    current_plan = models.ForeignKey(Plan, on_delete=models.CASCADE, null=True, blank=True)
     # package = models.IntegerField(null=True, blank=True)
     # amount = models.IntegerField()
     # created_date = models.DateTimeField(auto_now_add=True)

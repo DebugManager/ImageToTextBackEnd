@@ -1,8 +1,14 @@
+from djoser.views import TokenCreateView
 from rest_framework import generics
 
 from main.models import CompanyDoc, Company, CustomUser, Plan
-from main.serializers import CompanyDocSerializer, CompanySerializer, UserSerializer, GroupSerializer, PlanSerializer
+from main.serializers import CompanyDocSerializer, CompanySerializer, UserSerializer, GroupSerializer, PlanSerializer, \
+    CustomUserUpdateSerializer, CustomTokenCreateSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
+
+
+class CustomTokenCreateView(TokenCreateView):
+    serializer_class = CustomTokenCreateSerializer
 
 
 class MainList(generics.ListCreateAPIView):
@@ -21,6 +27,7 @@ class PlanList(generics.ListCreateAPIView):
     queryset = Plan.objects.all()
     serializer_class = PlanSerializer
     permission_classes = (AllowAny,)
+    filterset_fields = ['type']
 
 
 class PlanDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -50,4 +57,16 @@ class UserList(generics.ListCreateAPIView):
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (AllowAny,)
+
+
+class PersonalInfoUpdade(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserUpdateSerializer
+    permission_classes = (AllowAny,)
+
+
+class MounthPlanList(generics.ListCreateAPIView):
+    queryset = Plan.objects.all()
+    serializer_class = PlanSerializer
     permission_classes = (AllowAny,)
