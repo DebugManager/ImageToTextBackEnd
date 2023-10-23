@@ -1,7 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import User, AbstractUser, PermissionsMixin
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+
 
 from .managers import CustomUserManager
 
@@ -14,12 +14,12 @@ class Company(models.Model):
     total_channels = models.IntegerField()
     last_upd = models.DateTimeField(auto_now=True)
 
-
-class Option(models.Model):
-    name = models.CharField(max_length=40, unique=True)
-
-    def __str__(self):
-        return self.name
+#
+# class Option(models.Model):
+#     name = models.CharField(max_length=40, unique=True)
+#
+#     def __str__(self):
+#         return self.name
 
 
 class Plan(models.Model):

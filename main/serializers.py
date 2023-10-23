@@ -1,28 +1,10 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
+
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 from main.models import CompanyDoc, Company, CustomUser, Plan
-from djoser.serializers import UserCreateSerializer, TokenCreateSerializer
-
-
-class CustomTokenCreateSerializer(TokenCreateSerializer):
-    user = serializers.SerializerMethodField()
-
-    class Meta:
-        fields = ('auth_token', 'user')
-
-    def get_user(self, obj):
-        user = self.user  # Retrieve the user from the request context
-        custom_user = CustomUser.objects.get(user=user)  # Assuming your user model has a ForeignKey to CustomUser
-        user_data = {
-            'id': custom_user.id,
-            'email': user.email,
-            'is_superuser': user.is_superuser,
-
-            # Add more fields as needed
-        }
-        return user_data
+from djoser.serializers import UserCreateSerializer
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -36,7 +18,14 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 class CustomUserUpdateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
-        fields = ('first_name', 'last_name', 'email', 'password', 'address_line1', 'city', 'zip_code', 'country')
+        fields = ('address_line1', 'city', 'zip_code', 'country')
+
+
+class AllUserSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'last_login', 'email', 'is_superuser', 'is_staff', 'is_active', 'first_name', 'last_name',
+                  'address_line1', 'city', 'zip_code', 'country', 'current_plan')
 
 
 class UserSerializer(ModelSerializer):
@@ -67,8 +56,3 @@ class PlanSerializer(ModelSerializer):
     class Meta:
         model = Plan
         fields = '__all__'
-
-# class UserSerializer(ModelSerializer):
-#     class Meta:
-#         model = MyUser
-#         fields = ['username', 'password', 'package', 'amount', 'created_date', 'paid_date', 'method', 'status']

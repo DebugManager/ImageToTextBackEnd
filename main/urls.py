@@ -10,7 +10,7 @@ urlpatterns = [
     path('v1/plan/', views.PlanList.as_view()),
     path('v1/plan/<int:pk>/', views.PlanDetail.as_view()),
     path('v1/choose-plan/<int:pk>/', views.PersonalInfoUpdade.as_view()),
-    path('auth/token/create/', CustomTokenCreateView.as_view()),
+    path('v1/auth/token/create/', CustomTokenCreateView.as_view()),
     path('v1/auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
 ]

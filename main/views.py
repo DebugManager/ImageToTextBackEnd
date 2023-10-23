@@ -1,14 +1,29 @@
+from djoser.conf import settings
+from djoser import utils
 from djoser.views import TokenCreateView
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
 
 from main.models import CompanyDoc, Company, CustomUser, Plan
-from main.serializers import CompanyDocSerializer, CompanySerializer, UserSerializer, GroupSerializer, PlanSerializer, \
-    CustomUserUpdateSerializer, CustomTokenCreateSerializer
+from main.serializers import CompanyDocSerializer, CompanySerializer, UserSerializer, PlanSerializer, \
+    CustomUserUpdateSerializer, AllUserSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class CustomTokenCreateView(TokenCreateView):
-    serializer_class = CustomTokenCreateSerializer
+    serializer_class = settings.SERIALIZERS.token_create
+    permission_classes = settings.PERMISSIONS.token_create
+
+    def _action(self, serializer):
+        token = utils.login_user(self.request, serializer.user)
+        token_serializer_class = settings.SERIALIZERS.token
+        data = {
+            'token': token_serializer_class(token).data,
+             'user': AllUserSerializer(serializer.user).data
+        }
+        return Response(
+            data=data,  status=status.HTTP_200_OK
+        )
 
 
 class MainList(generics.ListCreateAPIView):
