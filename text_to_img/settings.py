@@ -118,7 +118,8 @@ REST_FRAMEWORK = {
 DJOSER = {
     'LOGIN_FIELD': 'email',
     "ACTIVATION_URL": "v1/auth/activate/{uid}/{token}",
-    'PASSWORD_RESET_CONFIRM_URL': 'v1/auth/users/reset_password_confirm/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'reset-password/{uid}/{token}',
+    'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'SERIALIZERS': {
         'user_create': 'main.serializers.CustomUserCreateSerializer'
     }

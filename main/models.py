@@ -42,8 +42,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    # address_line1 = models.CharField(max_length=255, blank=True)
+    # city = models.
     # current_plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
-    # package = models.IntegerField()
+    # package = models.IntegerField(null=True, blank=True)
     # amount = models.IntegerField()
     # created_date = models.DateTimeField(auto_now_add=True)
     # paid_date = models.DateTimeField()
