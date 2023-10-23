@@ -18,7 +18,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 class CustomUserUpdateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
-        fields = ('address_line1', 'city', 'zip_code', 'country')
+        fields = ('address_line1', 'city', 'zip_code', 'country', 'current_plan')
 
 
 class AllUserSerializer(ModelSerializer):

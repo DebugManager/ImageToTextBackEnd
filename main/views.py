@@ -11,18 +11,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class CustomTokenCreateView(TokenCreateView):
-    serializer_class = settings.SERIALIZERS.token_create
-    permission_classes = settings.PERMISSIONS.token_create
-
     def _action(self, serializer):
         token = utils.login_user(self.request, serializer.user)
         token_serializer_class = settings.SERIALIZERS.token
         data = {
             'token': token_serializer_class(token).data,
-             'user': AllUserSerializer(serializer.user).data
+            'user': AllUserSerializer(serializer.user).data
         }
         return Response(
-            data=data,  status=status.HTTP_200_OK
+            data=data, status=status.HTTP_200_OK
         )
 
 
