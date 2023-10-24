@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from main.models import CompanyDoc, Company, CustomUser, Plan, Feature
 from main.serializers import CompanyDocSerializer, CompanySerializer, UserSerializer, PlanSerializer, \
-    CustomUserUpdateSerializer, FeatureVoteSerializer,AllUserSerializer
+    CustomUserUpdateSerializer, FeatureVoteSerializer, AllUserSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -85,20 +85,26 @@ class MounthPlanList(generics.ListCreateAPIView):
     permission_classes = (AllowAny,)
 
 
+class FeatureView(generics.ListCreateAPIView):
+    queryset = Feature.objects.all()
+    serializer_class = FeatureVoteSerializer
+    permission_classes = (AllowAny,)
+
+
 class FeatureVoteView(APIView):
     permission_classes = (AllowAny,)
+
     def get(self, request):
         serializer = FeatureVoteSerializer(data=request.data)
         if serializer.is_valid():
             features_votes = {feature.name: feature.votes for feature in Feature.objects.all()}
             return Response(features_votes)
 
-
     def post(self, request, format=None):
         serializer = FeatureVoteSerializer(data=request.data)
 
         if serializer.is_valid():
-            feature_id = serializer.validated_data['feature_id']
+            feature_id = serializer.validated_data['id']
 
             try:
                 feature = Feature.objects.get(id=feature_id)

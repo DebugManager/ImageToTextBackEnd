@@ -13,11 +13,11 @@ class Company(models.Model):
     created = models.DateTimeField(auto_now=True)
 
 
-class Option(models.Model):
-    name = models.CharField(max_length=40, unique=True)
-
-    def __str__(self):
-        return self.name
+# class Option(models.Model):
+#     name = models.CharField(max_length=40, unique=True)
+#
+#     def __str__(self):
+#         return self.name
 
 
 class Plan(models.Model):
@@ -74,4 +74,4 @@ class CompanyDoc(models.Model):
 
 class Feature(models.Model):
     name = models.CharField(max_length=100)
-    votes = models.IntegerField()
+    votes = models.IntegerField(default=0)

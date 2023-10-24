@@ -31,7 +31,7 @@ class AllUserSerializer(ModelSerializer):
 class UserSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', "first_name", "last_name")
+        fields = ('email', "first_name", "last_name", 'current_plan', 'id')
 
 
 class GroupSerializer(ModelSerializer):
