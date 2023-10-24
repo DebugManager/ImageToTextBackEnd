@@ -3,10 +3,11 @@ from djoser import utils
 from djoser.views import TokenCreateView
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from main.models import CompanyDoc, Company, CustomUser, Plan
+from main.models import CompanyDoc, Company, CustomUser, Plan, Feature
 from main.serializers import CompanyDocSerializer, CompanySerializer, UserSerializer, PlanSerializer, \
-    CustomUserUpdateSerializer, AllUserSerializer
+    CustomUserUpdateSerializer, FeatureVoteSerializer,AllUserSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -26,7 +27,7 @@ class CustomTokenCreateView(TokenCreateView):
 class MainList(generics.ListCreateAPIView):
     queryset = CompanyDoc.objects.all()
     serializer_class = CompanyDocSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
 
 class MainDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -82,3 +83,29 @@ class MounthPlanList(generics.ListCreateAPIView):
     queryset = Plan.objects.all()
     serializer_class = PlanSerializer
     permission_classes = (AllowAny,)
+
+
+class FeatureVoteView(APIView):
+    permission_classes = (AllowAny,)
+    def get(self, request):
+        serializer = FeatureVoteSerializer(data=request.data)
+        if serializer.is_valid():
+            features_votes = {feature.name: feature.votes for feature in Feature.objects.all()}
+            return Response(features_votes)
+
+
+    def post(self, request, format=None):
+        serializer = FeatureVoteSerializer(data=request.data)
+
+        if serializer.is_valid():
+            feature_id = serializer.validated_data['feature_id']
+
+            try:
+                feature = Feature.objects.get(id=feature_id)
+                feature.votes += 1
+                feature.save()
+                return Response({'message': 'Vote added successfully.'}, status=status.HTTP_200_OK)
+            except Feature.DoesNotExist:
+                return Response({'message': 'Feature not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

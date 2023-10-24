@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from main.models import CompanyDoc, Company, CustomUser, Plan
+from main.models import CompanyDoc, Company, CustomUser, Plan, Feature
 from djoser.serializers import UserCreateSerializer
 
 
@@ -55,4 +55,10 @@ class CompanySerializer(ModelSerializer):
 class PlanSerializer(ModelSerializer):
     class Meta:
         model = Plan
+        fields = '__all__'
+
+
+class FeatureVoteSerializer(ModelSerializer):
+    class Meta:
+        model = Feature
         fields = '__all__'
