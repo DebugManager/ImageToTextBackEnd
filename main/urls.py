@@ -8,7 +8,7 @@ urlpatterns = [
     path('v1/main/<int:pk>/', views.MainDetail.as_view()),
     path('v1/users/', UserRoleList.as_view()),
     path('v1/users/<int:pk>/', views.UserDetail.as_view()),
-    path('v1/grant-permission/', GrantPermissionView.as_view()),
+    path('v1/users/grant-permission/', GrantPermissionView.as_view()),
     path('v1/plan/', views.PlanList.as_view()),
     path('v1/plan/<int:pk>/', views.PlanDetail.as_view()),
     path('v1/features/vote', views.FeatureVoteView.as_view()),
