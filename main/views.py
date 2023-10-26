@@ -1,13 +1,17 @@
+import django_filters
+from django.contrib.auth.models import Permission
+from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.conf import settings
 from djoser import utils
 from djoser.views import TokenCreateView
-from rest_framework import generics, status
+from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from main.models import CompanyDoc, Company, CustomUser, Plan, Feature
 from main.serializers import CompanyDocSerializer, CompanySerializer, UserSerializer, PlanSerializer, \
-    CustomUserUpdateSerializer, FeatureVoteSerializer, AllUserSerializer
+    CustomUserUpdateSerializer, FeatureVoteSerializer, AllUserSerializer, GrantPermissionSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -63,13 +67,48 @@ class CompanyDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class UserList(generics.ListCreateAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = AllUserSerializer
     permission_classes = (AllowAny,)
+
+
+class UserRoleList(generics.ListCreateAPIView):
+    serializer_class = AllUserSerializer
+    permission_classes = (AllowAny,)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['email', 'first_name', 'last_name']
+    ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name']
+
+    def list(self, request, *args, **kwargs):
+        users = CustomUser.objects.all()  # Replace with your user model
+        users = self.filter_queryset(users)
+
+        user_data = []
+        for user in users:
+            role = "admin" if user.is_superuser else ("staff" if user.is_staff else "customer")
+            user_data.append({
+                "id": user.id,
+                "email": user.email,
+                "last_login": user.last_login,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "address_line1": user.address_line1,
+                "city": user.city,
+                "zip_code": user.zip_code,
+                "country": user.country,
+                "current_plan": user.current_plan,
+                "joined": user.joined,
+                "role": role,
+            })
+
+        return Response(user_data, status=status.HTTP_200_OK)
+
+    def perform_create(self, serializer):
+        serializer.save(joined=timezone.now())  # todo
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = AllUserSerializer
     permission_classes = (AllowAny,)
 
 
@@ -94,24 +133,49 @@ class FeatureView(generics.ListCreateAPIView):
 class FeatureVoteView(APIView):
     permission_classes = (AllowAny,)
 
-    def get(self, request):
-        serializer = FeatureVoteSerializer(data=request.data)
-        if serializer.is_valid():
-            features_votes = {feature.name: feature.votes for feature in Feature.objects.all()}
-            return Response(features_votes)
-
     def post(self, request, format=None):
-        serializer = FeatureVoteSerializer(data=request.data)
+        feature_id = request.data.get('id')
 
+        try:
+            feature = Feature.objects.get(id=feature_id)
+            feature.votes += 1
+            feature.save()
+            return Response({'message': 'Vote successfully counted.', 'votes': feature.votes},
+                            status=status.HTTP_200_OK)
+        except Feature.DoesNotExist:
+            return Response({'error': 'Feature not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GrantPermissionView(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = GrantPermissionSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            feature_id = serializer.validated_data['id']
+            user_id = serializer.validated_data['user_id']
+            permission_codename = serializer.validated_data['permission_codename']
+            action = serializer.validated_data['action']
 
             try:
-                feature = Feature.objects.get(id=feature_id)
-                feature.votes += 1
-                feature.save()
-                return Response({'message': 'Vote added successfully.'}, status=status.HTTP_200_OK)
-            except Feature.DoesNotExist:
-                return Response({'message': 'Feature not found.'}, status=status.HTTP_404_NOT_FOUND)
+                user = CustomUser.objects.get(pk=user_id)
+                permission = Permission.objects.get(codename=permission_codename)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                if action == 'grant':
+                    user.user_permissions.add(permission)
+                    user.save()
+                    return Response({'message': f'Permission "{permission_codename}" granted to user {user_id}.'},
+                                    status=status.HTTP_200_OK)
+                elif action == 'revoke':
+                    user.user_permissions.remove(permission)
+                    user.save()
+                    return Response({'message': f'Permission "{permission_codename}" revoked from user {user_id}.'},
+                                    status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+            except CustomUser.DoesNotExist:
+                return Response({'error': 'User not found.'}, status=status.HTTP_400_BAD_REQUEST)
+            except Permission.DoesNotExist:
+                return Response({'error': 'Permission not found.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

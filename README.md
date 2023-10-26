@@ -10,6 +10,7 @@ In the project directory, you can run:
 https://pdf-to-txt-back.onrender.com/v1/main/ - all CompanyDoc\
 https://pdf-to-txt-back.onrender.com/v1/main/<id>/ - 1 CompanyDoc\
 https://pdf-to-txt-back.onrender.com/v1/plan?type=Annual - for annual prices
+https://pdf-to-txt-back.onrender.com/v1/ - get all users from db
 #### `Post`  
 https://pdf-to-txt-back.onrender.com/v1/main/  - create new\
 https://pdf-to-txt-back.onrender.com/auth/token/login/ - log in and get token\

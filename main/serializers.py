@@ -24,8 +24,9 @@ class CustomUserUpdateSerializer(UserCreateSerializer):
 class AllUserSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'last_login', 'email', 'is_superuser', 'is_staff', 'is_active', 'first_name', 'last_name',
-                  'address_line1', 'city', 'zip_code', 'country', 'current_plan')
+        fields = '__all__'
+        # fields = ('id', 'last_login', 'email', 'is_superuser', 'is_staff', 'is_active', 'first_name', 'last_name',
+        #           'address_line1', 'city', 'zip_code', 'country', 'current_plan')
 
 
 class UserSerializer(ModelSerializer):
@@ -61,4 +62,10 @@ class PlanSerializer(ModelSerializer):
 class FeatureVoteSerializer(ModelSerializer):
     class Meta:
         model = Feature
-        fields = '__all__'
+        fields = ("id", "name", "votes")
+
+
+class GrantPermissionSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()  # You can use a different field if necessary
+    permission_codename = serializers.CharField()
+    action = serializers.ChoiceField(choices=['grant', 'revoke'])
