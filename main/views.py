@@ -154,28 +154,31 @@ class GrantPermissionView(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user_id = serializer.validated_data['user_id']
-            permission_codename = serializer.validated_data['permission_codename']
+            permission_codenames = serializer.validated_data['permission_codenames']  # List of permission codenames
             action = serializer.validated_data['action']
 
             try:
                 user = CustomUser.objects.get(pk=user_id)
-                permission = Permission.objects.get(codename=permission_codename)
 
-                if action == 'grant':
-                    user.user_permissions.add(permission)
-                    user.save()
-                    return Response({'message': f'Permission "{permission_codename}" granted to user {user_id}.'},
-                                    status=status.HTTP_200_OK)
-                elif action == 'revoke':
-                    user.user_permissions.remove(permission)
-                    user.save()
-                    return Response({'message': f'Permission "{permission_codename}" revoked from user {user_id}.'},
-                                    status=status.HTTP_200_OK)
-                else:
-                    return Response({'error': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+                for permission_codename in permission_codenames:
+                    try:
+                        permission = Permission.objects.get(codename=permission_codename)
+
+                        if action == 'grant':
+                            user.user_permissions.add(permission)
+                        elif action == 'revoke':
+                            user.user_permissions.remove(permission)
+
+                    except Permission.DoesNotExist:
+                        return Response({'error': f'Permission "{permission_codename}" not found.'},
+                                        status=status.HTTP_400_BAD_REQUEST)
+
+                user.save()
+                return Response({'message': f'Permissions granted/revoked to/from user {user_id}.'},
+                                status=status.HTTP_200_OK)
+
             except CustomUser.DoesNotExist:
                 return Response({'error': 'User not found.'}, status=status.HTTP_400_BAD_REQUEST)
-            except Permission.DoesNotExist:
-                return Response({'error': 'Permission not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

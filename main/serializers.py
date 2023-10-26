@@ -67,5 +67,5 @@ class FeatureVoteSerializer(ModelSerializer):
 
 class GrantPermissionSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()  # You can use a different field if necessary
-    permission_codename = serializers.CharField()
+    permission_codenames = serializers.ListField(child=serializers.CharField())
     action = serializers.ChoiceField(choices=['grant', 'revoke'])
