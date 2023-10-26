@@ -6,8 +6,8 @@ from main.views import UserList, CustomTokenCreateView, GrantPermissionView, Use
 urlpatterns = [
     path('v1/main/', views.MainList.as_view()),
     path('v1/main/<int:pk>/', views.MainDetail.as_view()),
-    path('v1/', UserRoleList.as_view()),
-    path('v1/<int:pk>/', views.UserDetail.as_view()),
+    path('v1/users/', UserRoleList.as_view()),
+    path('v1/users/<int:pk>/', views.UserDetail.as_view()),
     path('v1/grant-permission/', GrantPermissionView.as_view()),
     path('v1/plan/', views.PlanList.as_view()),
     path('v1/plan/<int:pk>/', views.PlanDetail.as_view()),
