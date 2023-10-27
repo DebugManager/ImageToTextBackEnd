@@ -50,7 +50,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
     first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50, null=True, blank=True)
     address_line1 = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=50, blank=True)
     zip_code = models.IntegerField(null=True)
