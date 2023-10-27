@@ -46,6 +46,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    type = models.CharField(max_length=50, default="customer")
 
     objects = CustomUserManager()
     first_name = models.CharField(max_length=50)
@@ -56,7 +57,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     country = models.CharField(max_length=100, blank=True)
     current_plan = models.ForeignKey(Plan, on_delete=models.CASCADE, null=True, blank=True)
     joined = models.DateTimeField(default=timezone.now())  # todo
-    company = models.ManyToManyField(Company, null=True)  # todo
+    company = models.ManyToManyField(Company, null=True, blank=True)  # todo
 
     # package = models.IntegerField(null=True, blank=True)
     # amount = models.IntegerField()

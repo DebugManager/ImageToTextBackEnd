@@ -1,4 +1,3 @@
-import django_filters
 from django.contrib.auth.models import Permission
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -69,6 +68,17 @@ class UserList(generics.ListCreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AllUserSerializer
     permission_classes = (AllowAny,)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['email', 'first_name', 'last_name']
+    ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name', 'type']
+
+    def perform_create(self, serializer):
+        serializer.save(joined=timezone.now())
+        is_superuser = self.request.data.get('is_superuser', False)
+        is_staff = self.request.data.get('is_staff', False)
+        user_type = 'admin' if is_superuser else ('staff' if is_staff else 'customer')
+        serializer.validated_data['type'] = user_type
+        serializer.save()
 
 
 class UserRoleList(generics.ListCreateAPIView):
@@ -79,7 +89,7 @@ class UserRoleList(generics.ListCreateAPIView):
     ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name']
 
     def list(self, request, *args, **kwargs):
-        users = CustomUser.objects.all()  # Replace with your user model
+        users = CustomUser.objects.all()
         users = self.filter_queryset(users)
 
         user_data = []
@@ -103,13 +113,20 @@ class UserRoleList(generics.ListCreateAPIView):
         return Response(user_data, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
-        serializer.save(joined=timezone.now())  # todo
+        serializer.save(joined=timezone.now())
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AllUserSerializer
     permission_classes = (AllowAny,)
+
+    def perform_update(self, serializer):
+        is_superuser = self.request.data.get('is_superuser', serializer.instance.is_superuser)
+        is_staff = self.request.data.get('is_staff', serializer.instance.is_staff)
+        user_type = 'admin' if is_superuser else ('staff' if is_staff else 'customer')
+        serializer.validated_data['type'] = user_type
+        serializer.save()
 
 
 class PersonalInfoUpdade(generics.RetrieveUpdateDestroyAPIView):
@@ -154,7 +171,7 @@ class GrantPermissionView(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user_id = serializer.validated_data['user_id']
-            permission_codenames = serializer.validated_data['permission_codenames']  # List of permission codenames
+            permission_codenames = serializer.validated_data['permission_codenames']
             action = serializer.validated_data['action']
 
             try:
@@ -182,3 +199,90 @@ class GrantPermissionView(APIView):
 
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CreateUserAndGrantPermissionView(generics.CreateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = AllUserSerializer
+    permission_classes = (AllowAny,)
+    # filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    # search_fields = ['email', 'first_name', 'last_name']
+    # ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name', 'type']
+
+    def perform_create(self, serializer):
+        serializer.save(joined=timezone.now())
+        is_superuser = self.request.data.get('is_superuser', False)
+        is_staff = self.request.data.get('is_staff', False)
+        user_type = 'admin' if is_superuser else ('staff' if is_staff else 'customer')
+        serializer.validated_data['type'] = user_type
+        serializer.save()
+
+    def post(self, request, *args, **kwargs):
+        # Create the user by calling the base class's create method
+        response = super(CreateUserAndGrantPermissionView, self).post(request, *args, **kwargs)
+
+        if response.status_code == status.HTTP_201_CREATED:
+            # User was created successfully, now grant permissions
+            user_id = response.data['id']
+            permissions_to_grant = request.data.get('permissions_to_grant', [])
+
+            try:
+                user = CustomUser.objects.get(id=user_id)
+
+                for permission_codename in permissions_to_grant:
+                    try:
+                        permission = Permission.objects.get(codename=permission_codename)
+                        user.user_permissions.add(permission)
+
+                    except Permission.DoesNotExist:
+                        return Response({'error': f'Permission "{permission_codename}" not found.'},
+                                        status=status.HTTP_400_BAD_REQUEST)
+
+                user.save()
+                response.data['message'] = f'User created and permissions granted.'
+            except CustomUser.DoesNotExist:
+                return Response({'error': 'User not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return response
+
+#
+# class UpdateUserAndPermissionsView(APIView):
+#     permission_classes = (AllowAny,)
+#     serializer_class = AllUserSerializer  # Use the serializer for user info
+#
+#     def patch(self, request, *args, **kwargs):
+#         # Extract user info and permissions data from the request
+#         user_data = request.data.get('user_info', {})
+#         permission_data = request.data.get('permissions', [])
+#
+#         user_id = user_data.get('id')
+#
+#         try:
+#             user = CustomUser.objects.get(id=user_id)
+#
+#             # Update user info
+#             user_serializer = self.serializer_class(user, data=user_data, partial=True)
+#             if user_serializer.is_valid():
+#                 user_serializer.save()
+#             else:
+#                 return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#             # Grant or revoke permissions
+#             for permission_codename in permission_data:
+#                 try:
+#                     permission = Permission.objects.get(codename=permission_codename)
+#
+#                     if 'grant' in permission_data:
+#                         user.user_permissions.add(permission)
+#                     elif 'revoke' in permission_data:
+#                         user.user_permissions.remove(permission)
+#
+#                 except Permission.DoesNotExist:
+#                     return Response({'error': f'Permission "{permission_codename}" not found.'},
+#                                     status=status.HTTP_400_BAD_REQUEST)
+#
+#             user.save()
+#             return Response({'message': 'User info and permissions updated.'}, status=status.HTTP_200_OK)
+#
+#         except CustomUser.DoesNotExist:
+#             return Response({'error': 'User not found.'}, status=status.HTTP_400_BAD_REQUEST)

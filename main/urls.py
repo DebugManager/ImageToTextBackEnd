@@ -1,17 +1,20 @@
 from django.urls import path, include, re_path
 
 from main import views
-from main.views import UserList, CustomTokenCreateView, GrantPermissionView, UserRoleList
+from main.views import UserList, CustomTokenCreateView, GrantPermissionView, UserRoleList, \
+    CreateUserAndGrantPermissionView, UpdateUserAndPermissionsView
+
 urlpatterns = [
     path('v1/main/', views.MainList.as_view()),
     path('v1/main/<int:pk>/', views.MainDetail.as_view()),
-    path('v1/user/', UserList.as_view()),
+    path('v1/user/', CreateUserAndGrantPermissionView.as_view()),
+    # path('v1/user/<int:pk>/', UpdateUserAndPermissionsView.as_view()),
     path('v1/users/', UserRoleList.as_view()),
     path('v1/users/<int:pk>/', views.UserDetail.as_view()),
     path('v1/users/grant-permission/', GrantPermissionView.as_view()),
     path('v1/plan/', views.PlanList.as_view()),
     path('v1/plan/<int:pk>/', views.PlanDetail.as_view()),
-    path('v1/features/vote', views.FeatureVoteView.as_view()),
+    path('v1/features/vote/', views.FeatureVoteView.as_view()),
     path('v1/features/', views.FeatureView.as_view()),
     path('v1/choose-plan/<int:pk>/', views.PersonalInfoUpdade.as_view()),
     path('v1/auth/token/create/', CustomTokenCreateView.as_view()),
