@@ -245,13 +245,15 @@ class CreateUserAndGrantPermissionView(generics.CreateAPIView):
     # ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name', 'type']
 
     def perform_create(self, serializer):
-        serializer.save(joined=timezone.now())
+        user = serializer.save()
+        # Set the user's password and hash it
+        user.set_password(self.request.data.get('password'))
+        # Save any additional user data
+        user.joined = timezone.now()
         is_superuser = self.request.data.get('is_superuser', False)
         is_staff = self.request.data.get('is_staff', False)
-        user_type = 'admin' if is_superuser else ('staff' if is_staff else 'customer')
-        serializer.validated_data['type'] = user_type
-        serializer.set_password(['password'])
-        serializer.save()
+        user.type = 'admin' if is_superuser else ('staff' if is_staff else 'customer')
+        user.save()
 
     def post(self, request, *args, **kwargs):
         # Create the user by calling the base class's create method
