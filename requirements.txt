@@ -20,7 +20,7 @@ oauthlib
 packaging
 psycopg2-binary
 pycparser
-PyJWT
+PyJW
 python-dotenv
 python3-openid
 pytz
