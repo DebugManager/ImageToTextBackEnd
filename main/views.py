@@ -1,17 +1,22 @@
 from django.contrib.auth.models import Permission
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser.compat import get_user_email
 from djoser.conf import settings
-from djoser import utils
+from djoser import utils, signals
 from djoser.views import TokenCreateView
+from djoser.views import UserViewSet
+
 from rest_framework import generics, status, filters
 from rest_framework.generics import UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 
 from main.models import CompanyDoc, Company, CustomUser, Plan, Feature
 from main.serializers import CompanyDocSerializer, CompanySerializer, UserSerializer, PlanSerializer, \
-    CustomUserUpdateSerializer, FeatureVoteSerializer, AllUserSerializer, GrantPermissionSerializer
+    CustomUserUpdateSerializer, FeatureVoteSerializer, AllUserSerializer, GrantPermissionSerializer, \
+    CustomUserCreateSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -26,6 +31,34 @@ class CustomTokenCreateView(TokenCreateView):
         return Response(
             data=data, status=status.HTTP_200_OK
         )
+
+
+class CustomUserViewSet(UserViewSet):
+
+    @action(detail=False, methods=['post'])
+    def create_user_and_grant_permission(self, request):
+        # Extract user info and permissions data from the request
+        user_data = request.data.get('user_info', {})
+        permissions_to_grant = request.data.get('permissions_to_grant', [])
+
+        # Create a user using Djoser's serializer
+        user_serializer = self.get_serializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user_serializer.save()
+
+        # Get the created user instance
+        user = user_serializer.instance
+
+        # Grant permissions
+        for permission_codename in permissions_to_grant:
+            try:
+                permission = Permission.objects.get(codename=permission_codename)
+                user.user_permissions.add(permission)
+            except Permission.DoesNotExist:
+                return Response({'error': f'Permission "{permission_codename}" not found.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'message': 'User created and permissions granted.'}, status=status.HTTP_201_CREATED)
 
 
 class MainList(generics.ListCreateAPIView):
@@ -217,6 +250,7 @@ class CreateUserAndGrantPermissionView(generics.CreateAPIView):
         is_staff = self.request.data.get('is_staff', False)
         user_type = 'admin' if is_superuser else ('staff' if is_staff else 'customer')
         serializer.validated_data['type'] = user_type
+        serializer.set_password(['password'])
         serializer.save()
 
     def post(self, request, *args, **kwargs):
