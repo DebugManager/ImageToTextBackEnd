@@ -8,7 +8,7 @@ from djoser.views import TokenCreateView
 from djoser.views import UserViewSet
 
 from rest_framework import generics, status, filters
-from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import UpdateAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
@@ -284,45 +284,73 @@ class CreateUserAndGrantPermissionView(generics.CreateAPIView):
         return response
 
 
-class UpdateUserAndPermissionsView(UpdateAPIView):
+# class UpdateUserAndPermissionsView(UpdateAPIView):
+#     queryset = CustomUser.objects.all()
+#     serializer_class = AllUserSerializer
+#     permission_classes = (AllowAny,)
+#     lookup_field = 'pk'  # The primary key lookup field
+#
+#     def partial_update(self, request, *args, **kwargs):
+#         # Extract user info and permissions data from the request
+#         user_data = request.data.get('user_info', {})
+#         permission_data = request.data.get('permissions', [])
+#
+#         user_id = kwargs.get('pk')  # Extract user ID from URL parameter
+#
+#         try:
+#             user = CustomUser.objects.get(id=user_id)
+#
+#             # Update user info
+#             user_serializer = self.serializer_class(user, data=user_data, partial=True)
+#             if user_serializer.is_valid():
+#                 user_serializer.save()
+#             else:
+#                 return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#             # Grant or revoke permissions
+#             for permission_codename in permission_data:
+#                 try:
+#                     permission = Permission.objects.get(codename=permission_codename)
+#
+#                     if 'grant' in permission_data:
+#                         user.user_permissions.add(permission)
+#                     elif 'revoke' in permission_data:
+#                         user.user_permissions.remove(permission)
+#
+#                 except Permission.DoesNotExist:
+#                     return Response({'error': f'Permission "{permission_codename}" not found.'},
+#                                     status=status.HTTP_400_BAD_REQUEST)
+#
+#             user.save()
+#             return Response({'message': 'User info and permissions updated.'}, status=status.HTTP_200_OK)
+#
+#         except CustomUser.DoesNotExist:
+#             return Response({'error': 'User not found.'}, status=status.HTTP_400_BAD_REQUEST)
+class UpdateUserAndPermissionsView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AllUserSerializer
     permission_classes = (AllowAny,)
     lookup_field = 'pk'  # The primary key lookup field
 
     def partial_update(self, request, *args, **kwargs):
-        # Extract user info and permissions data from the request
-        user_data = request.data.get('user_info', {})
-        permission_data = request.data.get('permissions', [])
-
         user_id = kwargs.get('pk')  # Extract user ID from URL parameter
+        user = get_object_or_404(CustomUser, id=user_id)
 
-        try:
-            user = CustomUser.objects.get(id=user_id)
+        # Extract user data and permissions from the request
+        user_data = request.data
+        permissions_to_grant = user_data.pop('user_permissions', [])  # Remove permissions from user_data
 
-            # Update user info
-            user_serializer = self.serializer_class(user, data=user_data, partial=True)
-            if user_serializer.is_valid():
-                user_serializer.save()
-            else:
-                return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Update user info
+        user_serializer = self.serializer_class(user, data=user_data, partial=True)
+        if user_serializer.is_valid():
+            user_serializer.save()
+        else:
+            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            # Grant or revoke permissions
-            for permission_codename in permission_data:
-                try:
-                    permission = Permission.objects.get(codename=permission_codename)
+        # Grant or revoke permissions
+        user.user_permissions.clear()  # Remove all existing permissions
+        for permission_id in permissions_to_grant:
+            permission = get_object_or_404(Permission, pk=permission_id)
+            user.user_permissions.add(permission)
 
-                    if 'grant' in permission_data:
-                        user.user_permissions.add(permission)
-                    elif 'revoke' in permission_data:
-                        user.user_permissions.remove(permission)
-
-                except Permission.DoesNotExist:
-                    return Response({'error': f'Permission "{permission_codename}" not found.'},
-                                    status=status.HTTP_400_BAD_REQUEST)
-
-            user.save()
-            return Response({'message': 'User info and permissions updated.'}, status=status.HTTP_200_OK)
-
-        except CustomUser.DoesNotExist:
-            return Response({'error': 'User not found.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'User info and permissions updated.'}, status=status.HTTP_200_OK)

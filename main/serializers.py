@@ -24,7 +24,7 @@ class CustomUserUpdateSerializer(UserCreateSerializer):
 class AllUserSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = '__all__'
+        fields = ('__all__')
         # fields = ('id', 'last_login', 'email', 'is_superuser', 'is_staff', 'is_active', 'first_name', 'last_name',
         #           'address_line1', 'city', 'zip_code', 'country', 'current_plan')
 
