@@ -3,9 +3,6 @@ from django.contrib import admin
 from main.models import CompanyDoc, Company
 
 
-
-
-
 @admin.register(Company)
 class Company(admin.ModelAdmin):
     pass

@@ -1,17 +1,6 @@
-# from django.contrib.auth.models import Permission
-# from django.utils import timezone
-# from django_filters.rest_framework import DjangoFilterBackend
-# from djoser.compat import get_user_email
-# from djoser.conf import settings
-# from djoser import utils, signals
-# from djoser.views import TokenCreateView
-# from djoser.views import UserViewSet
-
 from rest_framework import generics, status, filters
-from rest_framework.generics import UpdateAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import action
 
 from main.models import CompanyDoc, Company, Plan, Feature
 from main.serializers import CompanyDocSerializer, CompanySerializer, PlanSerializer, FeatureVoteSerializer
@@ -35,7 +24,9 @@ class PlanList(generics.ListCreateAPIView):
     queryset = Plan.objects.all()
     serializer_class = PlanSerializer
     permission_classes = (AllowAny,)
-    filterset_fields = ['type']
+    filter_backends = [filters.SearchFilter]
+    # search_feilds =
+    # filterset_fields = ['type']
 
 
 class PlanDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -48,6 +39,8 @@ class CompanyList(generics.ListCreateAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = (AllowAny,)
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
 
 
 class CompanyDetail(generics.RetrieveUpdateDestroyAPIView):

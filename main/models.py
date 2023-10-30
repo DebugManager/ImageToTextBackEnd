@@ -1,9 +1,4 @@
-from django.utils import timezone
-from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-
-
 
 
 class Company(models.Model):
@@ -53,3 +48,18 @@ class Feature(models.Model):
 # class Feedback(models.Model):
 #     uset_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 #     text = models.TextField()
+
+
+# class Affiliate(models.Model):
+#     first_name = models.CharField(max_length=50)
+#     last_name = models.CharField(max_length=50)
+#     email = models.EmailField()
+#     # password # todo
+#     promotion_plan = models.TextField()
+#     twitter = models.CharField(max_length=255)
+#     instagram = models.CharField(max_length=255)
+#     tiktok = models.CharField(max_length=255)
+#     linkedin = models.CharField(max_length=255)
+#     facebook = models.CharField(max_length=255)
+#     paypal_email = models.EmailField()
+#     btc_adress = models.CharField(max_length=255)
