@@ -73,6 +73,9 @@ class FeatureVoteView(APIView):
         try:
             feature = Feature.objects.get(id=feature_id)
             user = CustomUser.objects.get(id=user_id)
+
+            if feature.voted_users.filter(id=user_id).exists():
+                return Response({'error': 'You have already voted for this feature.'}, status=status.HTTP_400_BAD_REQUEST)
             feature.votes += 1
             feature.save()
 
@@ -94,6 +97,8 @@ class FeatureUnvoteView(APIView):
         try:
             feature = Feature.objects.get(id=feature_id)
             user = CustomUser.objects.get(id=user_id)
+            if feature.voted_users.filter(id=user_id).exists():
+                return Response({'error': 'You have already unvote for this feature.'}, status=status.HTTP_400_BAD_REQUEST)
             feature.votes -= 1
             feature.save()
 
