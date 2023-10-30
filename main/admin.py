@@ -1,11 +1,9 @@
 from django.contrib import admin
 
-from main.models import CompanyDoc, CustomUser, Company
+from main.models import CompanyDoc, Company
 
 
-@admin.register(CustomUser)
-class MyUser(admin.ModelAdmin):
-    pass
+
 
 
 @admin.register(Company)

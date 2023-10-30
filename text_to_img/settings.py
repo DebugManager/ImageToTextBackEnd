@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'django_filters',
     'djoser',
 
-    'main'
+    'main',
+    'user'
 ]
 
 MIDDLEWARE = [
@@ -123,11 +124,11 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'reset-password/{uid}/{token}',
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'SERIALIZERS': {
-        'user_create': 'main.serializers.CustomUserCreateSerializer'
+        'user_create': 'user.serializers.CustomUserCreateSerializer'
     }
 }
 
-AUTH_USER_MODEL = 'main.CustomUser'
+AUTH_USER_MODEL = 'user.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
