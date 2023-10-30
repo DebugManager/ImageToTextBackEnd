@@ -39,3 +39,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         permissions = [('view', 'Can view specific page'), ('edit', 'Can edit content'), ('comment', 'Can comment'),
                        ('create_new', 'Can create new user')]
+
+
+
+class Feature(models.Model):
+    name = models.CharField(max_length=100)
+    votes = models.IntegerField(default=0)
+    voted_users = models.ManyToManyField(CustomUser, through='UserFeatureVote')
+
+
+class UserFeatureVote(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    feature = models.ForeignKey(Feature, on_delete=models.CASCADE)

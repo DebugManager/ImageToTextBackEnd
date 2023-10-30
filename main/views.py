@@ -2,10 +2,12 @@ from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from main.models import CompanyDoc, Company, Plan, Feature
+from main.models import CompanyDoc, Company, Plan
 from main.serializers import CompanyDocSerializer, CompanySerializer, PlanSerializer, FeatureVoteSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
+
+from user.models import CustomUser, Feature, UserFeatureVote
 
 
 class MainList(generics.ListCreateAPIView):
@@ -24,9 +26,6 @@ class PlanList(generics.ListCreateAPIView):
     queryset = Plan.objects.all()
     serializer_class = PlanSerializer
     permission_classes = (AllowAny,)
-    filter_backends = [filters.SearchFilter]
-    # search_feilds =
-    # filterset_fields = ['type']
 
 
 class PlanDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -59,18 +58,47 @@ class FeatureView(generics.ListCreateAPIView):
     queryset = Feature.objects.all()
     serializer_class = FeatureVoteSerializer
     permission_classes = (AllowAny,)
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name']
+    ordering_fields = ['name', 'votes']
 
 
 class FeatureVoteView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
-        feature_id = request.data.get('id')
+        feature_id = request.data.get('feature_id')
+        user_id = request.data.get('user_id')
 
         try:
             feature = Feature.objects.get(id=feature_id)
+            user = CustomUser.objects.get(id=user_id)
             feature.votes += 1
             feature.save()
+
+            user_vote = UserFeatureVote(user=user, feature=feature)
+            user_vote.save()
+            return Response({'message': 'Vote successfully counted.', 'votes': feature.votes},
+                            status=status.HTTP_200_OK)
+        except Feature.DoesNotExist:
+            return Response({'error': 'Feature not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class FeatureUnvoteView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request, format=None):
+        feature_id = request.data.get('id')
+        user_id = request.data.get('user_id')
+
+        try:
+            feature = Feature.objects.get(id=feature_id)
+            user = CustomUser.objects.get(id=user_id)
+            feature.votes -= 1
+            feature.save()
+
+            user_vote = UserFeatureVote.objects.filter(user=user, feature=feature)
+            user_vote.delete()
             return Response({'message': 'Vote successfully counted.', 'votes': feature.votes},
                             status=status.HTTP_200_OK)
         except Feature.DoesNotExist:

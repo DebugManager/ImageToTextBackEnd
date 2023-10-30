@@ -11,6 +11,7 @@ urlpatterns = [
     path('v1/plan/', views.PlanList.as_view()),
     path('v1/plan/<int:pk>/', views.PlanDetail.as_view()),
     path('v1/features/vote/', views.FeatureVoteView.as_view()),
+    path('v1/features/unvote/', views.FeatureUnvoteView.as_view()),
     path('v1/features/', views.FeatureView.as_view()),
 ]
 

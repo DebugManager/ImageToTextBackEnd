@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
-from main.models import CompanyDoc, Company, Plan, Feature
+from main.models import CompanyDoc, Company, Plan
+from user.models import Feature
 
 
 class CompanyDocSerializer(ModelSerializer):

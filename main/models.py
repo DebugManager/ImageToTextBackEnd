@@ -40,11 +40,6 @@ class CompanyDoc(models.Model):
     time_added = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField()
 
-
-class Feature(models.Model):
-    name = models.CharField(max_length=100)
-    votes = models.IntegerField(default=0)
-
 # class Feedback(models.Model):
 #     uset_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 #     text = models.TextField()
