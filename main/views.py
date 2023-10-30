@@ -88,7 +88,7 @@ class FeatureUnvoteView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
-        feature_id = request.data.get('id')
+        feature_id = request.data.get('feature_id')
         user_id = request.data.get('user_id')
 
         try:

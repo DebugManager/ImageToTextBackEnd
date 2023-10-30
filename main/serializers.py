@@ -25,4 +25,4 @@ class PlanSerializer(ModelSerializer):
 class FeatureVoteSerializer(ModelSerializer):
     class Meta:
         model = Feature
-        fields = ("id", "name", "votes")
+        fields = ("id", "name", "votes", "voted_users")
