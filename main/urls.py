@@ -14,6 +14,7 @@ urlpatterns = [
     path('v1/features/unvote/', views.FeatureUnvoteView.as_view()),
     path('v1/features/', views.FeatureView.as_view()),
     path('v1/support-posts/', views.SupportPostGetAllView.as_view()),
-    path('v1/support-posts/create/', views.SupportPostCreateView.as_view())
+    path('v1/support-posts/create/', views.SupportPostCreateView.as_view()),
+    path('v1/support-posts/edit/<int:pk>/', views.SupportPostEditView.as_view())
 ]
 

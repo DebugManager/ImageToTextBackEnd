@@ -152,3 +152,65 @@ class SupportPostCreateView(APIView):
             'status': 'success',
             'data': serializer.data
         }, status=201)
+
+
+# class SupportPostEditView(APIView):
+#     permission_classes = (AllowAny,)
+#     parser_classes = (MultiPartParser, JSONParser)
+#
+#     def put(self, request):
+#         return self.handle_request(request)
+#
+#     def patch(self, request):
+#         return self.handle_request(request)
+#
+#     def handle_request(self, request):
+#         # Get data from the request
+#         collum_title = request.data.get('collum_title')
+#         title = request.data.get('title')
+#         description = request.data.get('description')
+#         file = request.data.get('picture')
+#
+#         # Check if it's an edit request
+#         instance_id = request.data.get('pk')
+#         if instance_id:
+#             try:
+#                 uploaded_image = SupportPost.objects.get(id=instance_id)
+#             except SupportPost.DoesNotExist:
+#                 return Response({'error': 'Support post not found.'}, status=404)
+#         else:
+#             uploaded_image = SupportPost()
+#
+#         # Upload the image to Cloudinary
+#         upload_data = cloudinary.uploader.upload(file)
+#
+#         # Update or create the record in the database
+#         uploaded_image.collum_title = collum_title
+#         uploaded_image.title = title
+#         uploaded_image.description = description
+#         uploaded_image.image_url = upload_data['url']
+#         uploaded_image.save()
+#
+#         # Serialize the data and return the response
+#         serializer = SupportPostSerializer(uploaded_image)
+#         return Response({
+#             'status': 'success',
+#             'data': serializer.data
+#         }, status=201)
+
+class SupportPostEditView(generics.RetrieveUpdateAPIView):
+    queryset = SupportPost.objects.all()
+    serializer_class = SupportPostSerializer
+    permission_classes = (AllowAny,)
+    parser_classes = (MultiPartParser, JSONParser)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()  # Get the existing instance
+
+        if 'picture' in request.data:
+            # If a new image is provided, upload it to Cloudinary
+            file = request.data['picture']
+            upload_data = cloudinary.uploader.upload(file)
+            request.data['image_url'] = upload_data['url']
+
+        return super().update(request, *args, **kwargs)
