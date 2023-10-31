@@ -47,6 +47,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
+    'channels',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -92,7 +93,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'text_to_img.wsgi.application'
+ASGI_APPLICATION = 'text_to_img.routing.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
