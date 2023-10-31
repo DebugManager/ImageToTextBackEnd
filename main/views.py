@@ -226,8 +226,9 @@ class TicketList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         file = self.request.data.get('picture')
-        upload_data = cloudinary.uploader.upload(file)
-        serializer.validated_data['image_url'] = upload_data['url']
+        if file:
+            upload_data = cloudinary.uploader.upload(file)
+            serializer.validated_data['image_url'] = upload_data['url']
         serializer.save()
 
 
