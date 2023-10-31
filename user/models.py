@@ -59,3 +59,4 @@ class Ticket(models.Model):
     description = models.TextField()
     created = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=50)
+    image_url = models.URLField(null=True, blank=True)
