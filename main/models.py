@@ -47,6 +47,8 @@ class SupportPost(models.Model):
     description = models.TextField()
     image_url = models.URLField()
 
+
+
 # class Feedback(models.Model):
 #     uset_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 #     text = models.TextField()

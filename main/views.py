@@ -6,11 +6,11 @@ from rest_framework.views import APIView
 
 from main.models import CompanyDoc, Company, Plan, SupportPost
 from main.serializers import CompanyDocSerializer, CompanySerializer, PlanSerializer, FeatureVoteSerializer, \
-    SupportPostSerializer
+    SupportPostSerializer, TicketSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from user.models import CustomUser, Feature, UserFeatureVote
+from user.models import CustomUser, Feature, UserFeatureVote, Ticket
 
 
 class MainList(generics.ListCreateAPIView):
@@ -208,9 +208,19 @@ class SupportPostEditView(generics.RetrieveUpdateAPIView):
         instance = self.get_object()  # Get the existing instance
 
         if 'picture' in request.data:
+            print(request.data['picture'])
             # If a new image is provided, upload it to Cloudinary
             file = request.data['picture']
             upload_data = cloudinary.uploader.upload(file)
             request.data['image_url'] = upload_data['url']
 
         return super().update(request, *args, **kwargs)
+
+
+class TicketList(generics.ListCreateAPIView):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketSerializer
+    permission_classes = (AllowAny,)
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['subject']
+    ordering_fields = ['id', 'subject', 'created', 'status']

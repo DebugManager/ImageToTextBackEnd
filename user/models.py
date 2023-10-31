@@ -51,3 +51,11 @@ class Feature(models.Model):
 class UserFeatureVote(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     feature = models.ForeignKey(Feature, on_delete=models.CASCADE)
+
+
+class Ticket(models.Model):
+    subject = models.CharField(max_length=100)
+    user_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    description = models.TextField()
+    created = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=50)

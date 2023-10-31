@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
 from main.models import CompanyDoc, Company, Plan, SupportPost
-from user.models import Feature
+from user.models import Feature, Ticket
 
 
 class CompanyDocSerializer(ModelSerializer):
@@ -31,4 +31,10 @@ class FeatureVoteSerializer(ModelSerializer):
 class SupportPostSerializer(ModelSerializer):
     class Meta:
         model = SupportPost
+        fields = '__all__'
+
+
+class TicketSerializer(ModelSerializer):
+    class Meta:
+        model = Ticket
         fields = '__all__'
