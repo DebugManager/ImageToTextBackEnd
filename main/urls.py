@@ -13,5 +13,7 @@ urlpatterns = [
     path('v1/features/vote/', views.FeatureVoteView.as_view()),
     path('v1/features/unvote/', views.FeatureUnvoteView.as_view()),
     path('v1/features/', views.FeatureView.as_view()),
+    path('v1/support-posts/', views.SupportPostGetAllView.as_view()),
+    path('v1/support-posts/create/', views.SupportPostCreateView.as_view())
 ]
 

@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from main.models import CompanyDoc, Company, Plan
+from main.models import CompanyDoc, Company, Plan, SupportPost
 from user.models import Feature
 
 
@@ -26,3 +26,9 @@ class FeatureVoteSerializer(ModelSerializer):
     class Meta:
         model = Feature
         fields = ("id", "name", "votes", "voted_users")
+
+
+class SupportPostSerializer(ModelSerializer):
+    class Meta:
+        model = SupportPost
+        fields = '__all__'
