@@ -41,7 +41,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                        ('create_new', 'Can create new user')]
 
 
-
 class Feature(models.Model):
     name = models.CharField(max_length=100)
     votes = models.IntegerField(default=0)
@@ -60,3 +59,14 @@ class Ticket(models.Model):
     created = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=50)
     image_url = models.URLField(null=True, blank=True)
+
+
+class ChatRoom(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+
+class ChatMessage(models.Model):
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)

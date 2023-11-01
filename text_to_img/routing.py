@@ -1,13 +1,13 @@
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-from django.urls import path
+from django.urls import re_path
 
 from main.consumers import FirstConsumer
 
+websocket_urlpatterns = [
+    re_path(r'ws/chat/(?P<room_name>\w+)/$', FirstConsumer.as_asgi()),
+    # Add more routing for different consumers if needed
+]
+
 application = ProtocolTypeRouter({
-    "websocket": AuthMiddlewareStack(
-        URLRouter([
-            path("ws/web-socket/", FirstConsumer.as_asgi()),
-        ]),
-    ),
+    "websocket": URLRouter(websocket_urlpatterns),
 })

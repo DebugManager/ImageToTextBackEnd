@@ -95,6 +95,14 @@ TEMPLATES = [
 
 ASGI_APPLICATION = 'text_to_img.routing.application'
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
+CHANNEL_LAYERS["default"]["ROUTING"] = "your_project.routing.websocket_urlpatterns"
+
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
