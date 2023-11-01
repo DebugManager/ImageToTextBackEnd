@@ -1,10 +1,12 @@
 asgiref
+async-timeout
 attrs
 autobahn
 Automat
 certifi
 cffi
 channels
+channels-redis
 charset-normalizer
 cloudinary
 constantly
@@ -25,6 +27,7 @@ hyperlink
 idna
 incremental
 jwcrypto
+msgpack
 oauthlib
 packaging
 psycopg2-binary
@@ -36,6 +39,7 @@ pyOpenSSL
 python-dotenv
 python3-openid
 pytz
+redis
 requests
 requests-oauthlib
 service-identity
@@ -49,4 +53,3 @@ typing_extensions
 urllib3
 wrapt
 zope.interface
-channels-redis
