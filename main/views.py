@@ -1,4 +1,5 @@
 import cloudinary.uploader
+from django.shortcuts import render
 from rest_framework import generics, status, filters
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.response import Response
@@ -247,3 +248,11 @@ class TicketDetail(generics.RetrieveUpdateDestroyAPIView):
             request.data['image_url'] = upload_data['url']
 
         return super().update(request, *args, **kwargs)
+
+
+def index(request):
+    return render(request, "chat/index.html")
+
+
+def room(request, room_name):
+    return render(request, "chat/room.html", {"room_name": room_name})

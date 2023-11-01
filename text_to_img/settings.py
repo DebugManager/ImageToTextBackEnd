@@ -47,7 +47,6 @@ if RENDER_EXTERNAL_HOSTNAME:
 CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
-    'channels',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -93,6 +92,9 @@ TEMPLATES = [
     },
 ]
 
+
+WSGI_APPLICATION = 'text_to_img.wsgi.application'
+
 ASGI_APPLICATION = 'text_to_img.routing.application'
 
 CHANNEL_LAYERS = {
@@ -101,7 +103,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-CHANNEL_LAYERS["default"]["ROUTING"] = "your_project.routing.websocket_urlpatterns"
+CHANNEL_LAYERS["default"]["ROUTING"] = "text_to_img.routing.websocket_urlpatterns"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
