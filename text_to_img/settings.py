@@ -48,6 +48,8 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Application definition
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
     'daphne',
