@@ -48,6 +48,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
     'daphne',
+    'channels',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -59,7 +60,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'djoser',
-    'channels',
+
 
     'main',
     'user'
@@ -105,7 +106,6 @@ CHANNEL_LAYERS = {
     },
 }
 
-CHANNEL_LAYERS["default"]["ROUTING"] = "text_to_img.routing.websocket_urlpatterns"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
