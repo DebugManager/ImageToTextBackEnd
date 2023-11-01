@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+import urllib
 from pathlib import Path
 
 import dj_database_url
@@ -24,6 +25,8 @@ cloudinary.config(
     api_key=os.environ.get("CLOUD_API_KEY"),
     api_secret=os.environ.get("CLOUD_API_SECRET")
 )
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -100,9 +103,21 @@ WSGI_APPLICATION = 'text_to_img.wsgi.application'
 
 ASGI_APPLICATION = 'text_to_img.routing.application'
 
+
+redis_url = os.environ.get("REDIS_URL")
+
+# Parse the URL to get the host and port
+url_parts = urllib.parse.urlparse(redis_url)
+host = url_parts.hostname
+port = url_parts.port
+
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get("REDIS_URL",)],
+        },
     },
 }
 
