@@ -47,6 +47,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
+    'daphne',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'djoser',
+    'channels',
 
     'main',
     'user'
