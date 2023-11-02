@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from user.models import CustomUser
+from user.models import CustomUser, Ticket
 from djoser.serializers import UserCreateSerializer
 
 
@@ -57,4 +57,14 @@ class AllUserForAdminSerializer(ModelSerializer):
 class UserForAdminUpdateSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate')
+        fields = ('id', 'first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate')
+
+
+class TicketForAdminSerializer(ModelSerializer):
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ticket
+        fields = ('website', 'site_code', 'id', 'first_name' 'last_name', 'email')
