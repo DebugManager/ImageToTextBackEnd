@@ -14,7 +14,8 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 
 from user.models import CustomUser
-from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer
+from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer, \
+    AllUserForAdminSerializer, UserForAdminUpdateSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -58,9 +59,6 @@ class CustomUserViewSet(UserViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'message': 'User created and permissions granted.'}, status=status.HTTP_201_CREATED)
-
-
-
 
 
 class UserList(generics.ListCreateAPIView):
@@ -291,3 +289,18 @@ class UpdateUserAndPermissionsView(generics.UpdateAPIView):
             user.user_permissions.add(permission)
 
         return Response({'message': 'User info and permissions updated.'}, status=status.HTTP_200_OK)
+
+
+class AllUsersForAdminView(generics.ListCreateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = AllUserForAdminSerializer
+    permission_classes = (AllowAny,)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['email', 'first_name', 'last_name']
+    ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name', 'type']
+
+
+class DetailUserForAdminView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserForAdminUpdateSerializer
+    permission_classes = (AllowAny,)
