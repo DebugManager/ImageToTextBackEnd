@@ -29,12 +29,17 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     joined = models.DateTimeField(default=timezone.now())
     company = models.ManyToManyField(Company, null=True, blank=True)
 
+    phone = models.CharField(max_length=50, blank=True, null=True)
+    affiliate = models.BooleanField(default=False)
+    affiliate_code = models.CharField(max_length=20, null=True, blank=True)
+    status = models.CharField(max_length=50, default="Succes")
+
     # package = models.IntegerField(null=True, blank=True)
     # amount = models.IntegerField()
     ## created_date = models.DateTimeField(auto_now_add=True)
     # paid_date = models.DateTimeField()
     # method = models.CharField(max_length=50)
-    # status = models.IntegerField()
+    #
     # USERNAME_FIELD = 'email'
     class Meta:
         permissions = [('view', 'Can view specific page'), ('edit', 'Can edit content'), ('comment', 'Can comment'),
@@ -59,6 +64,10 @@ class Ticket(models.Model):
     created = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=50)
     image_url = models.URLField(null=True, blank=True)
+
+    website = models.CharField(max_length=100, blank=True, default=True)
+    site_code = models.CharField(max_length=100, blank=True, default=True)
+
 
 
 class ChatRoom(models.Model):
