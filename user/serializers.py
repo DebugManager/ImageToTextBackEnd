@@ -45,3 +45,16 @@ class GroupSerializer(ModelSerializer):
     class Meta:
         model = Group
         fields = ("name",)
+
+
+class AllUserForAdminSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('first_name', 'last_name', 'email', 'phone', 'affiliate', 'affiliate_code', 'address_line1', 'status',
+                  'country', 'joined')
+
+
+class UserForAdminUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate')
