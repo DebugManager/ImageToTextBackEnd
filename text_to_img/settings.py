@@ -118,7 +118,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("3.75.199.184", 6382)],
+            "hosts": [("3.120.129.34", 6382)],
             # "hosts": [os.environ.get("REDIS_URL",)],
         },
     },
