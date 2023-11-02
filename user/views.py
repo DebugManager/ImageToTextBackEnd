@@ -317,7 +317,7 @@ class AllTicketForAdminView(generics.ListCreateAPIView):
     permission_classes = (AllowAny,)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['subject', 'website', 'description']
-    ordering_fields = ['website', 'site_code', 'id', 'first_name', 'last_name', 'email', 'status', 'user_id']
+    ordering_fields = ['website', 'site_code', 'id', 'user__first_name', 'user__last_name', 'user__email', 'status', 'user_id']
     filterset_class = DateRangeFilter  # Apply the custom filter
 
     def get_queryset(self):
