@@ -50,14 +50,14 @@ class GroupSerializer(ModelSerializer):
 class AllUserForAdminSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'phone', 'affiliate', 'affiliate_code', 'address_line1', 'status',
+        fields = ('id', 'first_name', 'last_name', 'email', 'phone', 'affiliate', 'affiliate_code', 'address_line1', 'status',
                   'country', 'joined')
 
 
 class UserForAdminUpdateSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate')
+        fields = ('first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate', 'id')
 
 
 class TicketForAdminSerializer(ModelSerializer):
@@ -67,4 +67,4 @@ class TicketForAdminSerializer(ModelSerializer):
 
     class Meta:
         model = Ticket
-        fields = ('website', 'site_code', 'id', 'first_name' 'last_name', 'email')
+        fields = ('website', 'site_code', 'id', 'first_name' 'last_name', 'email', 'status', 'user_id')
