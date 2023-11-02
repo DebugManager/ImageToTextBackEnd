@@ -13,7 +13,7 @@ urlpatterns = [
     path('v1/users/grant-permission/', GrantPermissionView.as_view()),
     path('v1/auth/token/create/', CustomTokenCreateView.as_view()),
     path('v1/admin/users/', AllUsersForAdminView.as_view()),
-    path('v1/admin/users/<int:pk>', DetailUserForAdminView.as_view()),
+    path('v1/admin/users/<int:pk>/', DetailUserForAdminView.as_view()),
     path('v1/admin/ticket/', AllTicketForAdminView.as_view()),
     path('v1/auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
