@@ -1,5 +1,6 @@
 from django.contrib.auth.models import Permission
 from django.utils import timezone
+from django_filters import DateFilter, DateFromToRangeFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.compat import get_user_email
 from djoser.conf import settings
@@ -18,6 +19,10 @@ from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, Gran
     AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
+
+
+class DateRangeFilter(FilterSet):
+    created = DateFromToRangeFilter(field_name="created")
 
 
 class CustomTokenCreateView(TokenCreateView):
@@ -312,5 +317,19 @@ class AllTicketForAdminView(generics.ListCreateAPIView):
     permission_classes = (AllowAny,)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['subject', 'website', 'description']
-    ordering_fields = ['website', 'site_code', 'id', 'first_name' 'last_name', 'email', 'status', 'user_id']
+    ordering_fields = ['website', 'site_code', 'id', 'first_name', 'last_name', 'email', 'status', 'user_id']
+    filterset_class = DateRangeFilter  # Apply the custom filter
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Apply additional filtering based on your needs
+        # For example, you can filter the queryset using request data
+
+        date_range = self.request.query_params.get("date_range")
+        if date_range:
+            # date_range format should be like "2023-10-01|2023-10-31"
+            start_date, end_date = date_range.split("|")
+            queryset = queryset.filter(created__range=[start_date, end_date])
+
+        return queryset
