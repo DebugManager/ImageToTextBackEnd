@@ -13,9 +13,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
-from user.models import CustomUser
+from user.models import CustomUser, Ticket
 from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer, \
-    AllUserForAdminSerializer, UserForAdminUpdateSerializer
+    AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -304,3 +304,13 @@ class DetailUserForAdminView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserForAdminUpdateSerializer
     permission_classes = (AllowAny,)
+
+
+class AllTicketForAdminView(generics.ListCreateAPIView):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketForAdminSerializer
+    permission_classes = (AllowAny,)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['subject', 'website', 'description']
+    ordering_fields = ['website', 'site_code', 'id', 'first_name' 'last_name', 'email', 'status', 'user_id']
+
