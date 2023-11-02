@@ -1,15 +1,14 @@
 from django.contrib.auth.models import Permission
 from django.utils import timezone
-from django_filters import DateFilter, DateFromToRangeFilter, FilterSet
+from django_filters import DateFromToRangeFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from djoser.compat import get_user_email
 from djoser.conf import settings
-from djoser import utils, signals
+from djoser import utils
 from djoser.views import TokenCreateView
 from djoser.views import UserViewSet
 
 from rest_framework import generics, status, filters
-from rest_framework.generics import UpdateAPIView, get_object_or_404
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
@@ -107,7 +106,7 @@ class UserRoleList(generics.ListCreateAPIView):
                 "city": user.city,
                 "zip_code": user.zip_code,
                 "country": user.country,
-                "current_plan": user.current_plan,
+                "current_plan": user.current_plan.id,
                 "joined": user.joined,
                 "role": role,
             })
