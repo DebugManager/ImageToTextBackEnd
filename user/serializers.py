@@ -67,4 +67,19 @@ class TicketForAdminSerializer(ModelSerializer):
 
     class Meta:
         model = Ticket
-        fields = ('website', 'site_code', 'id', 'first_name' 'last_name', 'email', 'status', 'user_id')
+        fields = ('website', 'site_code', 'id', 'first_name', 'last_name', 'email', 'status', 'user_id')
+
+    def get_first_name(self, obj):
+        if obj.user_id:
+            return obj.user_id.first_name
+        return None
+
+    def get_last_name(self, obj):
+        if obj.user_id:
+            return obj.user_id.last_name
+        return None
+
+    def get_email(self, obj):
+        if obj.user_id:
+            return obj.user_id.email
+        return None
