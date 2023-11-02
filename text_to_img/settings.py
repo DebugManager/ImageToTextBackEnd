@@ -68,7 +68,9 @@ INSTALLED_APPS = [
 
 
     'main',
-    'user'
+    'user',
+    'payments',
+
 ]
 
 MIDDLEWARE = [
@@ -169,6 +171,9 @@ DJOSER = {
 
 AUTH_USER_MODEL = 'user.CustomUser'
 
+
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -217,3 +222,9 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS')
+
+
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51O7yDQDV4Z1ssWPD2djwQ2hHTHlW123md4BuJayXc4U57yFX5fWGyV8v3u8jN0otD88oExiqRjcbKlSmLTB1LerY000I4uwmVV'
+STRIPE_SECRET_KEY = 'sk_test_51O7yDQDV4Z1ssWPDY3nGY646xCDk4AiAaVD7jllreOoT6hlFruQrNAttqCbgKaTzpDpMlbqCQjRXSCV4J0efDdEj00UtNuMxMr'
+
+SITE_URL = "http://localhost:8000/"
