@@ -1,5 +1,15 @@
 # Getting Started with Django App
 
+## Setup
+### launch redis (aws)
+redis-server redis.conf\
+if port unavilable\
+<code>redis-cli -p port_value</code>\
+<code>shutdown</code>
+### Run
+<code>daphne -b 0.0.0.0 text_to_img.asgi:application</code>
+
+
 ## Available Scripts
 
 In the project directory, you can run:
