@@ -40,16 +40,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'RENDER' not in os.environ
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 
 # Application definition
-
-
 
 INSTALLED_APPS = [
     'daphne',
@@ -105,9 +101,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'text_to_img.wsgi.application'
 
-ASGI_APPLICATION = 'text_to_img.routing.application'
-
-
+ASGI_APPLICATION = 'text_to_img.asgi.application'
 
 
 CHANNEL_LAYERS = {
@@ -131,16 +125,17 @@ CHANNEL_LAYERS = {
 #     }
 # }
 
-# CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://app.djangoboiler.xyz/',
-    'http://admin.djangoboiler.xyz/',
-]
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:8000'
+#     'http://localhost:3000',
+#     'http://localhost:3001',
+#     'http://app.djangoboiler.xyz/',
+#     'http://admin.djangoboiler.xyz/',
+# ]
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -212,9 +207,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, 'text_to_img/static')]
-
 
 
 
