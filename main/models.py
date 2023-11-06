@@ -8,6 +8,9 @@ class Company(models.Model):
     name = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
 
 # class Option(models.Model):
 #     name = models.CharField(max_length=40, unique=True)
@@ -31,6 +34,9 @@ class Plan(models.Model):
     option7 = models.CharField(max_length=50, blank=True)
     option8 = models.CharField(max_length=50, blank=True)
 
+    def __str__(self):
+        return f'{self.name} ({self.type})'
+
 
 class CompanyDoc(models.Model):
     name = models.CharField(max_length=255)
@@ -40,14 +46,15 @@ class CompanyDoc(models.Model):
     time_added = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField()
 
+    def __str__(self):
+        return self.name
+
 
 class SupportPost(models.Model):
     collum_title = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
     description = models.TextField()
     image_url = models.URLField()
-
-
 
 # class Feedback(models.Model):
 #     uset_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

@@ -13,9 +13,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
-from user.models import CustomUser, Ticket, ChatRoom
+from user.models import CustomUser, Ticket, ChatRoom, ChatMessage
 from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer, \
-    AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer, ChatRoomSerializer
+    AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer, ChatRoomSerializer, \
+    ChatMessageSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -347,3 +348,21 @@ class ChatRoomDetailView(generics.RetrieveAPIView):
     lookup_field = 'name'
     permission_classes = (AllowAny,)
 
+
+class ChatMessagesView(generics.ListAPIView):
+    serializer_class = ChatMessageSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        # Get the room name from the URL parameter
+        room_name = self.kwargs['room_name']
+
+        # Retrieve the room_id associated with the room_name
+        try:
+            room_id = ChatRoom.objects.get(name=room_name).id
+        except ChatRoom.DoesNotExist:
+            room_id = None
+
+        # Filter messages based on the room_id
+        queryset = ChatMessage.objects.filter(room_id=room_id)
+        return queryset
