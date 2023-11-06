@@ -54,3 +54,4 @@ urllib3
 wrapt
 zope.interface
 watchdog
+whitenoise
