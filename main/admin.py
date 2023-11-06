@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from main.models import CompanyDoc, Company
+from main.models import CompanyDoc, Company, Plan
+
+
+@admin.register(Plan)
+class Plan(admin.ModelAdmin):
+    pass
 
 
 @admin.register(Company)
