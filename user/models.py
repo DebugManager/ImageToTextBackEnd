@@ -69,7 +69,6 @@ class Ticket(models.Model):
     site_code = models.CharField(max_length=100, blank=True, default=True)
 
 
-
 class ChatRoom(models.Model):
     name = models.CharField(max_length=255, unique=True)
 

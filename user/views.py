@@ -13,9 +13,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
-from user.models import CustomUser, Ticket
+from user.models import CustomUser, Ticket, ChatRoom
 from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer, \
-    AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer
+    AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer, ChatRoomSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -316,7 +316,8 @@ class AllTicketForAdminView(generics.ListCreateAPIView):
     permission_classes = (AllowAny,)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['subject', 'website', 'description']
-    ordering_fields = ['website', 'site_code', 'id', 'user__first_name', 'user__last_name', 'user__email', 'status', 'user_id']
+    ordering_fields = ['website', 'site_code', 'id', 'user__first_name', 'user__last_name', 'user__email', 'status',
+                       'user_id']
     filterset_class = DateRangeFilter  # Apply the custom filter
 
     def get_queryset(self):
@@ -332,3 +333,17 @@ class AllTicketForAdminView(generics.ListCreateAPIView):
             queryset = queryset.filter(created__range=[start_date, end_date])
 
         return queryset
+
+
+class ChatRoomListCreateView(generics.ListCreateAPIView):
+    queryset = ChatRoom.objects.all()
+    serializer_class = ChatRoomSerializer
+    permission_classes = (AllowAny,)
+
+
+class ChatRoomDetailView(generics.RetrieveAPIView):
+    queryset = ChatRoom.objects.all()
+    serializer_class = ChatRoomSerializer
+    lookup_field = 'name'
+    permission_classes = (AllowAny,)
+

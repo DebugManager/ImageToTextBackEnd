@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from user.models import CustomUser, Ticket
+from user.models import CustomUser, Ticket, ChatRoom
 from djoser.serializers import UserCreateSerializer
 
 
@@ -83,3 +83,9 @@ class TicketForAdminSerializer(ModelSerializer):
         if obj.user_id:
             return obj.user_id.email
         return None
+
+
+class ChatRoomSerializer(ModelSerializer):
+    class Meta:
+        model = ChatRoom
+        fields = ('__all__')
