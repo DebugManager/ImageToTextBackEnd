@@ -51,6 +51,9 @@ class Feature(models.Model):
     votes = models.IntegerField(default=0)
     voted_users = models.ManyToManyField(CustomUser, through='UserFeatureVote')
 
+    def __str__(self):
+        return self.name
+
 
 class UserFeatureVote(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -67,6 +70,9 @@ class Ticket(models.Model):
 
     website = models.CharField(max_length=100, blank=True, default=True)
     site_code = models.CharField(max_length=100, blank=True, default=True)
+
+    def __str__(self):
+        return self.subject
 
 
 class ChatRoom(models.Model):
