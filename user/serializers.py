@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from user.models import CustomUser
+from user.models import CustomUser, Ticket
 from djoser.serializers import UserCreateSerializer
 
 
@@ -50,11 +50,36 @@ class GroupSerializer(ModelSerializer):
 class AllUserForAdminSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'phone', 'affiliate', 'affiliate_code', 'address_line1', 'status',
+        fields = ('id', 'first_name', 'last_name', 'email', 'phone', 'affiliate', 'affiliate_code', 'address_line1', 'status',
                   'country', 'joined')
 
 
 class UserForAdminUpdateSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate')
+        fields = ('first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate', 'id')
+
+
+class TicketForAdminSerializer(ModelSerializer):
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ticket
+        fields = ('website', 'site_code', 'id', 'first_name', 'last_name', 'email', 'status', 'user_id')
+
+    def get_first_name(self, obj):
+        if obj.user_id:
+            return obj.user_id.first_name
+        return None
+
+    def get_last_name(self, obj):
+        if obj.user_id:
+            return obj.user_id.last_name
+        return None
+
+    def get_email(self, obj):
+        if obj.user_id:
+            return obj.user_id.email
+        return None

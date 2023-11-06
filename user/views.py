@@ -1,23 +1,27 @@
 from django.contrib.auth.models import Permission
 from django.utils import timezone
+from django_filters import DateFromToRangeFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from djoser.compat import get_user_email
 from djoser.conf import settings
-from djoser import utils, signals
+from djoser import utils
 from djoser.views import TokenCreateView
 from djoser.views import UserViewSet
 
 from rest_framework import generics, status, filters
-from rest_framework.generics import UpdateAPIView, get_object_or_404
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
-from user.models import CustomUser
+from user.models import CustomUser, Ticket
 from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer, \
-    AllUserForAdminSerializer, UserForAdminUpdateSerializer
+    AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
+
+
+class DateRangeFilter(FilterSet):
+    created = DateFromToRangeFilter(field_name="created")
 
 
 class CustomTokenCreateView(TokenCreateView):
@@ -102,7 +106,7 @@ class UserRoleList(generics.ListCreateAPIView):
                 "city": user.city,
                 "zip_code": user.zip_code,
                 "country": user.country,
-                "current_plan": user.current_plan,
+                "current_plan": user.current_plan.id,
                 "joined": user.joined,
                 "role": role,
             })
@@ -304,3 +308,27 @@ class DetailUserForAdminView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserForAdminUpdateSerializer
     permission_classes = (AllowAny,)
+
+
+class AllTicketForAdminView(generics.ListCreateAPIView):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketForAdminSerializer
+    permission_classes = (AllowAny,)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['subject', 'website', 'description']
+    ordering_fields = ['website', 'site_code', 'id', 'user__first_name', 'user__last_name', 'user__email', 'status', 'user_id']
+    filterset_class = DateRangeFilter  # Apply the custom filter
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Apply additional filtering based on your needs
+        # For example, you can filter the queryset using request data
+
+        date_range = self.request.query_params.get("date_range")
+        if date_range:
+            # date_range format should be like "2023-10-01|2023-10-31"
+            start_date, end_date = date_range.split("|")
+            queryset = queryset.filter(created__range=[start_date, end_date])
+
+        return queryset

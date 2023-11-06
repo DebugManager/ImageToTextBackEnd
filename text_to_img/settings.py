@@ -47,9 +47,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 # Application definition
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
+
 
 INSTALLED_APPS = [
     'daphne',
@@ -108,19 +106,13 @@ WSGI_APPLICATION = 'text_to_img.wsgi.application'
 ASGI_APPLICATION = 'text_to_img.routing.application'
 
 
-redis_url = os.environ.get("REDIS_URL")
-
-# Parse the URL to get the host and port
-url_parts = urllib.parse.urlparse(redis_url)
-host = url_parts.hostname
-port = url_parts.port
 
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("3.75.199.184", 6382)],
+            "hosts": [("3.120.129.34", 6382)],
             # "hosts": [os.environ.get("REDIS_URL",)],
         },
     },
@@ -137,6 +129,16 @@ CHANNEL_LAYERS = {
 #     }
 # }
 
+# CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://app.djangoboiler.xyz/',
+    'http://admin.djangoboiler.xyz/',
+]
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
