@@ -1,5 +1,7 @@
 import cloudinary.uploader
+import django_filters
 from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, filters
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.response import Response
@@ -30,6 +32,8 @@ class PlanList(generics.ListCreateAPIView):
     queryset = Plan.objects.all()
     serializer_class = PlanSerializer
     permission_classes = (AllowAny,)
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['type']
 
 
 class PlanDetail(generics.RetrieveUpdateDestroyAPIView):

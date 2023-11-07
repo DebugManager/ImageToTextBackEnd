@@ -55,3 +55,4 @@ wrapt
 zope.interface
 watchdog
 whitenoise
+stripe
