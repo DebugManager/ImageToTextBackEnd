@@ -189,15 +189,15 @@ class WebhookReceivedView(View):
 
         return JsonResponse({'status': 'success'})
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class ProcessPaymentView(View):
     @method_decorator(require_POST)
     def post(self, request):
-        data = request.POST
-        token = data.get('token')
-
+        # Parse the JSON data from the request body
         try:
+            data = json.loads(request.body.decode("utf-8"))
+            token = data.get('token')
+
             # Create a payment intent using the card token
             payment_intent = stripe.PaymentIntent.create(
                 amount=1000,  # Amount in cents
