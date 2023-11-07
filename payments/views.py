@@ -5,12 +5,15 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class GetConfigView(APIView):
@@ -87,7 +90,7 @@ class ListSubscriptionsView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None):
-        customer_id = request.COOKIES.get('customer')
+        customer_id = request.data.get('customer_id')
 
         try:
             subscriptions = stripe.Subscription.list(
@@ -104,7 +107,7 @@ class PreviewInvoiceView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None):
-        customer_id = request.COOKIES.get('customer')
+        customer_id = request.data.get('customer_id')
         subscription_id = request.GET.get('subscriptionId')
         new_price_lookup_key = request.GET.get('newPriceLookupKey')
 
@@ -185,3 +188,34 @@ class WebhookReceivedView(View):
             print('Subscription canceled: %s' % event['id'])
 
         return JsonResponse({'status': 'success'})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ProcessPaymentView(View):
+    @method_decorator(require_POST)
+    def post(self, request):
+        data = request.POST
+        token = data.get('token')
+
+        try:
+            # Create a payment intent using the card token
+            payment_intent = stripe.PaymentIntent.create(
+                amount=1000,  # Amount in cents
+                currency="usd",
+                description="Payment for order",
+                payment_method_types=["card"],
+                payment_method_data={
+                    "type": "card",
+                    "card": {
+                        "token": token  # Use the card token here
+                    }
+                },
+                confirm=True
+            )
+
+            # Payment processed successfully
+            return JsonResponse({'success': True, 'intent': payment_intent})
+        except stripe.error.CardError as e:
+            # Payment error, return the error to the client
+            return JsonResponse({'error': str(e)})
+
