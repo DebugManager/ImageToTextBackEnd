@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -21,34 +22,53 @@ class GetConfigView(APIView):
 
     def get(self, request):
         try:
-            # Retrieves two prices with the lookup_keys
-            # `sample_basic` and `sample_premium`. To
-            # create these prices, you can use the Stripe
-            # CLI fixtures command with the supplied
-            # `seed.json` fixture file like so:
-            #
-            #    stripe fixtures seed.json
-            #
+            # Retrieves prices based on the interval query parameter
+            interval = request.GET.get('interval', None)
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
-            # Define the lookup keys
-            # lookup_keys = ['Montly subscribe']
+            # Define the parameters for listing prices
+            params = {}
+            if interval:
+                params['recurring[interval]'] = interval
 
-            prices = []
-            prices_1 = stripe.Price.list()
+            prices = stripe.Price.list(**params)
 
-            for price in prices_1:
-                prices.append(price)
+            # Serialize the prices data
+            serialized_prices = []
+            for price in prices:
+                product_name = stripe.Product.retrieve(id=price.product)
+                serialized_prices.append({
+                    'id': price.id,
+                    'object': price.object,
+                    'active': price.active,
+                    'billing_scheme': price.billing_scheme,
+                    'created': price.created,
+                    'custom_unit_amount': price.custom_unit_amount,
+                    'livemode': price.livemode,
+                    'lookup_key': price.lookup_key,
+                    'metadata': price.metadata,
+                    'nickname': price.nickname,
+                    'product': price.product,
+                    'currency': price.currency,
+                    'recurring': price.recurring,
+                    'tax_behavior': price.tax_behavior,
+                    'tiers_mode': price.tiers_mode,
+                    'transform_quantity': price.transform_quantity,
+                    'type': price.type,
+                    'unit_amount': price.unit_amount,
+                    'unit_amount_decimal': price.unit_amount_decimal,
+                    'product_name': product_name.name,
+                    # Add other fields you need here
+                })
 
             return Response({
                 'publishableKey': settings.STRIPE_PUBLISHABLE_KEY,
-                'prices': prices,
+                'prices': serialized_prices,
             })
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
-
 
 class CreateCustomerView(APIView):
     permission_classes = (AllowAny,)
@@ -211,6 +231,10 @@ class ProcessPaymentView(View):
                     }
                 },
                 confirm=True
+            )
+            stripe.PaymentIntent.confirm(
+                "pi_1Gt0Mi2eZvKYlo2C5JxhMqP7",
+                payment_method="pm_card_visa",
             )
 
             # Payment processed successfully
