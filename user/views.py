@@ -1,3 +1,4 @@
+import stripe
 from django.contrib.auth.models import Permission
 from django.utils import timezone
 from django_filters import DateFromToRangeFilter, FilterSet
@@ -36,6 +37,25 @@ class CustomTokenCreateView(TokenCreateView):
         return Response(
             data=data, status=status.HTTP_200_OK
         )
+
+
+class CustomUserCreateView(UserViewSet):
+    permission_classes = (AllowAny,)
+    def create(self, request, *args, **kwargs):
+        user_serializer = self.get_serializer(data=request.data)
+        customer = stripe.Customer.create(email=request.data['email'])
+        user_serializer.is_valid(raise_exception=True)
+        user_serializer.save()
+        # You can add custom logic here, e.g., sending a welcome email
+        user = user_serializer.instance
+        # Customize the response data if needed
+        response_data = {
+            "user_id": user.id,
+            "email": user.email,
+            "customer": customer,
+            "message": "User registered successfully",
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class CustomUserViewSet(UserViewSet):
