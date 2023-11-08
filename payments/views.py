@@ -59,6 +59,7 @@ class GetConfigView(APIView):
                     'unit_amount': price.unit_amount,
                     'unit_amount_decimal': price.unit_amount_decimal,
                     'product_name': product_name.name,
+                    'options': product_name.features,
                     # Add other fields you need here
                 })
 
@@ -69,6 +70,21 @@ class GetConfigView(APIView):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
+
+class GetUserWithProduct(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        try:
+            client = stripe.Customer.retrieve('cus_OxisOo0W23YQ3T', expand=["subscriptions"])
+            product_id = client['subscriptions']['data'][0]['items']['data'][0]['plan']['product']
+            price_id = client['subscriptions']['data'][0]['items']['data'][0]['plan']['id']
+            product_name = stripe.Product.retrieve(id=product_id)
+            return Response({'client': client, 'product_id': product_name.id, 'price_id': price_id})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
 
 class CreateCustomerView(APIView):
     permission_classes = (AllowAny,)
@@ -209,6 +225,7 @@ class WebhookReceivedView(View):
 
         return JsonResponse({'status': 'success'})
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class ProcessPaymentView(View):
     @method_decorator(require_POST)
@@ -242,4 +259,3 @@ class ProcessPaymentView(View):
         except stripe.error.CardError as e:
             # Payment error, return the error to the client
             return JsonResponse({'error': str(e)})
-

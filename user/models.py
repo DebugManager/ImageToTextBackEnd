@@ -17,6 +17,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     type = models.CharField(max_length=50, default="customer")
+    customer_id = models.CharField(max_length=100, default="Clear")
 
     objects = CustomUserManager()
     first_name = models.CharField(max_length=50)

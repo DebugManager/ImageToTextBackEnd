@@ -56,3 +56,4 @@ zope.interface
 watchdog
 whitenoise
 stripe
+drf-yasg
