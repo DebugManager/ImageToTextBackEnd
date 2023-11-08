@@ -72,6 +72,19 @@ class GetConfigView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
 
 
+class GetAllSubscriptions(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        subscriptions = stripe.Subscription.list()
+
+        return Response({
+            'publishableKey': settings.STRIPE_PUBLISHABLE_KEY,
+            'subscriptions': subscriptions,
+
+        })
+
+
 class GetPlanByIdView(APIView):
     permission_classes = (AllowAny,)
 
@@ -81,7 +94,6 @@ class GetPlanByIdView(APIView):
             stripe.api_key = settings.STRIPE_SECRET_KEY
             price = stripe.Price.retrieve(price_id)
             product = stripe.Product.retrieve(price.product)
-
 
             return Response({
                 'publishableKey': settings.STRIPE_PUBLISHABLE_KEY,
@@ -257,6 +269,8 @@ class ProcessPaymentView(View):
             data = json.loads(request.body.decode("utf-8"))
             token = data.get('token')
             price_id = data.get('price_id')
+            customer_id = data.get('customer_id')
+            payment_method_id = data.get('payment_method_id')
             price = stripe.Price.retrieve(price_id)
 
             # Create a payment intent using the card token
@@ -276,9 +290,26 @@ class ProcessPaymentView(View):
             # stripe.PaymentIntent.confirm(
             #     payment_intent.id,
             # )
+            # attach = stripe.PaymentMethod.attach(
+            #     "pm_1OACvMDV4Z1ssWPDZify6Yaq",
+            #     customer=customer_id,
+            # )
+
+            customer = stripe.Customer.modify(
+                customer_id,
+                invoice_settings=
+                {"default_payment_method": payment_method_id}
+            )
+            subsription = stripe.Subscription.create(
+                customer=customer_id,
+                items=[
+                    {"price": price_id,
+                     },
+                ],
+            )
 
             # Payment processed successfully
-            return JsonResponse({'success': True, 'intent': payment_intent})
+            return JsonResponse({'success': True, 'intent': payment_intent, 'subsription': subsription})
         except stripe.error.CardError as e:
             # Payment error, return the error to the client
             return JsonResponse({'error': str(e)})
