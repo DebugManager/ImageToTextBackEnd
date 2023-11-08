@@ -1,10 +1,11 @@
 from django.urls import path
 
 from payments.views import GetConfigView, CreateCustomerView, CancelSubscriptionView, ListSubscriptionsView, \
-    PreviewInvoiceView, UpdateSubscriptionView, ProcessPaymentView, GetUserWithProduct
+    PreviewInvoiceView, UpdateSubscriptionView, ProcessPaymentView, GetUserWithProduct, GetPlanByIdView
 
 urlpatterns = [
     path('get_config/', GetConfigView.as_view()),
+    path('get-plan/<str:product_id>/', GetPlanByIdView.as_view()),
     path('create-user/', CreateCustomerView.as_view()),
     # path('create-user/<str:customer_id>/', CreateCustomerView.as_view()),#todo
     path('get-user/', GetUserWithProduct.as_view()),

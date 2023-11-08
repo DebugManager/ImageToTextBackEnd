@@ -72,6 +72,25 @@ class GetConfigView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
 
 
+class GetPlanByIdView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, product_id):
+        try:
+
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            product = stripe.Product.retrieve(product_id)
+
+
+            return Response({
+                'publishableKey': settings.STRIPE_PUBLISHABLE_KEY,
+                'price': product,
+            })
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
+
 class GetUserWithProduct(APIView):
     permission_classes = (AllowAny,)
 
