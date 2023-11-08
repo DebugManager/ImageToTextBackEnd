@@ -159,7 +159,7 @@ class CancelSubscriptionView(APIView):
 class ListSubscriptionsView(APIView):
     permission_classes = (AllowAny,)
 
-    def get(self, request, format=None):
+    def post(self, request, format=None):
         customer_id = request.data.get('customer_id')
 
         try:
@@ -303,6 +303,8 @@ class ProcessPaymentView(View):
                 invoice_settings=
                 {"default_payment_method": payment_method_id}
             )
+
+
             subsription = stripe.Subscription.create(
                 customer=customer_id,
                 items=[
