@@ -75,9 +75,10 @@ class GetConfigView(APIView):
 class GetUserWithProduct(APIView):
     permission_classes = (AllowAny,)
 
-    def get(self, request):
+    def post(self, request):
+        data = request.data
         try:
-            client = stripe.Customer.retrieve('cus_OxisOo0W23YQ3T', expand=["subscriptions"])
+            client = stripe.Customer.retrieve(data['customer_id'], expand=["subscriptions"])
             product_id = client['subscriptions']['data'][0]['items']['data'][0]['plan']['product']
             price_id = client['subscriptions']['data'][0]['items']['data'][0]['plan']['id']
             product_name = stripe.Product.retrieve(id=product_id)
