@@ -80,11 +80,13 @@ class GetPlanByIdView(APIView):
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
             price = stripe.Price.retrieve(price_id)
+            product = stripe.Product.retrieve(price.product)
 
 
             return Response({
                 'publishableKey': settings.STRIPE_PUBLISHABLE_KEY,
                 'price': price,
+                'product': product,
             })
 
         except Exception as e:
