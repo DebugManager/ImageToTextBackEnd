@@ -5,7 +5,7 @@ from payments.views import GetConfigView, CreateCustomerView, CancelSubscription
 
 urlpatterns = [
     path('get_config/', GetConfigView.as_view()),
-    path('get-plan/<str:product_id>/', GetPlanByIdView.as_view()),
+    path('get-price/<str:price_id>/', GetPlanByIdView.as_view()),
     path('create-user/', CreateCustomerView.as_view()),
     # path('create-user/<str:customer_id>/', CreateCustomerView.as_view()),#todo
     path('get-user/', GetUserWithProduct.as_view()),

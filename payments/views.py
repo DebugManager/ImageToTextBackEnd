@@ -75,16 +75,16 @@ class GetConfigView(APIView):
 class GetPlanByIdView(APIView):
     permission_classes = (AllowAny,)
 
-    def get(self, request, product_id):
+    def get(self, request, price_id):
         try:
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
-            product = stripe.Product.retrieve(product_id)
+            price = stripe.Price.retrieve(price_id)
 
 
             return Response({
                 'publishableKey': settings.STRIPE_PUBLISHABLE_KEY,
-                'price': product,
+                'price': price,
             })
 
         except Exception as e:
