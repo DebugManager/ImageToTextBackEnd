@@ -235,10 +235,12 @@ class ProcessPaymentView(View):
         try:
             data = json.loads(request.body.decode("utf-8"))
             token = data.get('token')
+            price_id = data.get('price_id')
+            price = stripe.Price.retrieve(price_id)
 
             # Create a payment intent using the card token
             payment_intent = stripe.PaymentIntent.create(
-                amount=1000,  # Amount in cents
+                amount=price.unit_amount,  # Amount in cents
                 currency="usd",
                 description="Payment for order",
                 payment_method_types=["card"],
@@ -250,13 +252,13 @@ class ProcessPaymentView(View):
                 },
                 confirm=True
             )
-            stripe.PaymentIntent.confirm(
-                "pi_1Gt0Mi2eZvKYlo2C5JxhMqP7",
-                payment_method="pm_card_visa",
-            )
+            # stripe.PaymentIntent.confirm(
+            #     payment_intent.id,
+            # )
 
             # Payment processed successfully
             return JsonResponse({'success': True, 'intent': payment_intent})
         except stripe.error.CardError as e:
             # Payment error, return the error to the client
             return JsonResponse({'error': str(e)})
+        # except

@@ -1,5 +1,6 @@
 import cloudinary.uploader
 import django_filters
+import stripe
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, filters
@@ -34,6 +35,31 @@ class PlanList(generics.ListCreateAPIView):
     permission_classes = (AllowAny,)
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['type']
+
+# class PlanList(APIView):
+#     def get(self, request):
+#         # Set your Stripe API key
+#         stripe.api_key = settings.STRIPE_API_KEY
+#
+#         try:
+#             # Fetch all prices from Stripe
+#             prices = stripe.Price.list()
+#             price_data = []
+#
+#             for price in prices.data:
+#                 price_data.append({
+#                     "id": price.id,
+#                     "nickname": price.nickname,
+#                     "unit_amount": price.unit_amount,
+#                     "currency": price.currency,
+#                     "product_id": price.product,
+#                     "interval": price.recurring.interval,
+#                 })
+#
+#             return JsonResponse({"prices": price_data})
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)})
+
 
 
 class PlanDetail(generics.RetrieveUpdateDestroyAPIView):
