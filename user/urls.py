@@ -20,7 +20,7 @@ urlpatterns = [
     path('v1/create-room/', ChatRoomListCreateView.as_view()),
     path('v1/room/<str:name>/', ChatRoomDetailView.as_view()),
     path('v1/messages/<str:room_name>/', ChatMessagesView.as_view()),
-    path('v1/auth/register/', CustomUserCreateView.as_view({'post': 'create'})),
+    path('v1/auth/register/', CustomUserCreateView.as_view()),
     path('v1/auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
 ]

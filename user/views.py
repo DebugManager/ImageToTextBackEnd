@@ -9,7 +9,7 @@ from djoser.views import TokenCreateView
 from djoser.views import UserViewSet
 
 from rest_framework import generics, status, filters
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import get_object_or_404, CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
@@ -39,23 +39,63 @@ class CustomTokenCreateView(TokenCreateView):
         )
 
 
-class CustomUserCreateView(UserViewSet):
+class CustomUserCreateView(CreateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = AllUserSerializer
     permission_classes = (AllowAny,)
+
     def create(self, request, *args, **kwargs):
-        user_serializer = self.get_serializer(data=request.data)
-        customer = stripe.Customer.create(email=request.data['email'])
-        user_serializer.is_valid(raise_exception=True)
-        user_serializer.save()
-        # You can add custom logic here, e.g., sending a welcome email
-        user = user_serializer.instance
+        # Extract the fields from the request data
+        email = request.data.get('email')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+
+        # Create a Stripe customer and obtain the customer ID
+        customer = stripe.Customer.create(email=email)
+
+        # Create a user model instance with the provided fields
+        user = CustomUser(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            customer_id=customer.id,  # Store the customer ID from Stripe
+            # You can add other fields here if needed
+        )
+        user.set_password(request.data.get('password'))  # Set the user's password
+
+        # Save the user to the database
+        user.save()
+
         # Customize the response data if needed
         response_data = {
             "user_id": user.id,
             "email": user.email,
-            "customer": customer,
+            "customer_id": customer.id,  # Include the customer ID from Stripe
             "message": "User registered successfully",
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+#
+# class CustomUserCreateView(UserViewSet):
+#     permission_classes = (AllowAny,)
+#
+#     def create(self, request, *args, **kwargs):
+#         user_serializer = self.get_serializer(data=request.data)
+#         customer = stripe.Customer.create(email=request.data['email'])
+#
+#         user_serializer.is_valid(raise_exception=True)
+#         user_serializer.save()
+#         # You can add custom logic here, e.g., sending a welcome email
+#         user = user_serializer.instance
+#         # Customize the response data if needed
+#         response_data = {
+#             "user_id": user.id,
+#             "email": user.email,
+#             "customer": customer,
+#             "message": "User registered successfully",
+#         }
+#         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class CustomUserViewSet(UserViewSet):
