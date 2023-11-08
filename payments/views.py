@@ -272,6 +272,9 @@ class ProcessPaymentView(View):
             customer_id = data.get('customer_id')
             payment_method_id = data.get('payment_method_id')
             price = stripe.Price.retrieve(price_id)
+            if 'old_subscription_id' in data:
+                old_subscription_id = data.get('old_subscription_id')
+                stripe.Subscription.cancel(old_subscription_id)
 
             # Create a payment intent using the card token
             payment_intent = stripe.PaymentIntent.create(
