@@ -273,6 +273,7 @@ class ProcessPaymentView(View):
             payment_method_id = data.get('payment_method_id')
             price = stripe.Price.retrieve(price_id)
             old_subscription_id = data.get('old_subscription_id')
+
             if old_subscription_id:
                 stripe.Subscription.cancel(old_subscription_id)
 
