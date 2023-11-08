@@ -26,7 +26,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=50, blank=True)
     zip_code = models.IntegerField(null=True)
     country = models.CharField(max_length=100, blank=True)
-    current_plan = models.ForeignKey(Plan, on_delete=models.CASCADE, null=True, blank=True)
+    current_plan = models.CharField(max_length=100, null=True, blank=True)
+    # current_plan = models.ForeignKey(Plan, on_delete=models.CASCADE, null=True, blank=True)
     joined = models.DateTimeField(default=timezone.now())
     company = models.ManyToManyField(Company, null=True, blank=True)
 
