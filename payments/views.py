@@ -354,6 +354,8 @@ class ProcessPaymentView(View):
                 ],
             )
 
+            self.update_current_plan_id_in_db(customer=customer, price_id=price_id)
+
             if old_subscription_id:
                 stripe.Subscription.cancel(old_subscription_id)
                 self.update_subscription_id_in_db(customer=customer, new_subscription_id=subscription.id)
@@ -371,4 +373,8 @@ class ProcessPaymentView(View):
 
     def update_payment_method_id_in_db(self, customer, new_payment_method_id):
         customer.payment_method_id = new_payment_method_id
+        customer.save()
+
+    def update_current_plan_id_in_db(self, customer, price_id):
+        customer.current_plan = price_id
         customer.save()
