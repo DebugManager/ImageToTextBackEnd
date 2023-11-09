@@ -9,7 +9,7 @@ from user.views import CustomTokenCreateView, GrantPermissionView, UserRoleList,
 urlpatterns = [
     path('v1/user-create-with-permissions/', CreateUserAndGrantPermissionView.as_view()),
     path('v1/user-create-with-permissions/<int:pk>/', UpdateUserAndPermissionsView.as_view()),
-    path('v1/users/', UserList.as_view()),
+    path('v1/users/', UserRoleList.as_view()),
     path('v1/users/<int:pk>/', UserDetail.as_view()),
     path('v1/users/grant-permission/', GrantPermissionView.as_view()),
     path('v1/choose-plan/<int:pk>/', PersonalInfoUpdade.as_view()),
