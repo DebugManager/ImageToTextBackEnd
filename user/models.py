@@ -50,6 +50,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     affiliate_code = models.CharField(max_length=20, null=True, blank=True)
     status = models.CharField(max_length=50, default="Succes")
 
+    # image_url = models.URLField()
+
     # package = models.IntegerField(null=True, blank=True)
     # amount = models.IntegerField()
     ## created_date = models.DateTimeField(auto_now_add=True)
