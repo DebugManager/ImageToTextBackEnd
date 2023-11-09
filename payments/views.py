@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -29,7 +30,6 @@ class GetConfigView(APIView):
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
-            # Define the parameters for listing prices
             params = {}
             if interval:
                 params['recurring[interval]'] = interval
@@ -126,17 +126,10 @@ class CreateCustomerView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
-        # Reads JSON data from the request
         data = request.data
 
         try:
-            # Create a new customer object
             customer = stripe.Customer.create(email=data['email'])
-
-            # At this point, you can associate the ID of the Customer object with
-            # your own internal representation of a customer if needed.
-
-            # Simulate authentication by storing the ID of the customer in a cookie.
             response = Response({'customer': customer}, status=status.HTTP_201_CREATED)
             response.set_cookie('customer', customer.id)
 
@@ -288,14 +281,14 @@ class ProcessPaymentView(View):
 
             # Create a payment intent using the card token
             payment_intent = stripe.PaymentIntent.create(
-                amount=price.unit_amount,  # Amount in cents
+                amount=price.unit_amount,
                 currency="usd",
                 description="Payment for order",
                 payment_method_types=["card"],
                 payment_method_data={
                     "type": "card",
                     "card": {
-                        "token": token  # Use the card token here
+                        "token": token
                     }
                 },
                 confirm=True
@@ -340,7 +333,6 @@ class ProcessOnHoldView(View):
     def post(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            # token = data.get('token')
             price_id = data.get('price_id')
             customer_id = data.get('customer_id')
             payment_method_id = data.get('payment_method_id')
@@ -350,21 +342,6 @@ class ProcessOnHoldView(View):
             customer = CustomUser.objects.get(customer_id=customer_id)
             if payment_method_id != customer.payment_method_id and payment_method_id:
                 self.update_payment_method_id_in_db(customer=customer, new_payment_method_id=payment_method_id)
-
-            # Create a payment intent using the card token
-            # payment_intent = stripe.PaymentIntent.create(
-            #     amount=price.unit_amount,  # Amount in cents
-            #     currency="usd",
-            #     description="Payment for order",
-            #     payment_method_types=["card"],
-            #     payment_method_data={
-            #         "type": "card",
-            #         "card": {
-            #             "token": token  # Use the card token here
-            #         }
-            #     },
-            #     confirm=True
-            # )
 
             subscription = stripe.Subscription.create(
                 customer=customer_id,
@@ -397,3 +374,37 @@ class ProcessOnHoldView(View):
     def update_current_plan_id_in_db(self, customer, price_id):
         customer.current_plan = price_id
         customer.save()
+
+
+class InvoiceTable(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        client_id = request.data.get('customer_id')
+        try:
+            invoice = stripe.Invoice.list(customer=client_id)
+            invoises = []
+            for inv in invoice['data']:
+                invoises.append({
+                    'id': inv['id'],
+                    'amount': inv['amount_paid'],
+                    'crated_date': datetime.fromtimestamp(inv['lines']['data'][0]['period']['start']),
+                    'paid_date': datetime.fromtimestamp(inv['lines']['data'][0]['period']['end']),
+                    'name': stripe.Product.retrieve(inv['lines']['data'][0]['plan']['product'])['name'],
+                    'method': stripe.PaymentMethod.retrieve(
+                        stripe.Customer.retrieve(client_id)['invoice_settings']['default_payment_method'])['card'][
+                        'brand'],
+                    'status': inv['status'],
+                    'invoice_pdf': inv['invoice_pdf']
+                })
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
+            # data = {
+            #     'payment_method': payment['card']['brand'],
+            #     'amount': price['unit_amount'],
+            #     'package':product['name']
+            # }
+
+            # return JsonResponse({'customer': customer, 'payment': payment})
+        return JsonResponse({'data': invoises})
