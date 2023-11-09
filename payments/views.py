@@ -151,9 +151,16 @@ class CancelSubscriptionView(APIView):
     def post(self, request, format=None):
         data = request.data
         try:
+            customer_id = data['customer_id']
+            customer = CustomUser.objects.get(customer_id=customer_id)
             # Cancel the subscription by deleting it
-            deleted_subscription = stripe.Subscription.delete(data['subscriptionId'])
-            return Response({'subscription': deleted_subscription}, status=status.HTTP_200_OK)
+            deleted_subscription = stripe.Subscription.delete(data['subscription_id'])
+            customer.subscription_id = None
+            customer.payment_method_id = None
+            customer.current_plan = None
+            customer.save()
+
+            return Response({'success': True, 'subscription': deleted_subscription}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
 
