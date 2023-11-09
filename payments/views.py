@@ -378,3 +378,68 @@ class ProcessPaymentView(View):
     def update_current_plan_id_in_db(self, customer, price_id):
         customer.current_plan = price_id
         customer.save()
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ProcessOnHoldView(View):
+    @method_decorator(require_POST)
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            # token = data.get('token')
+            price_id = data.get('price_id')
+            customer_id = data.get('customer_id')
+            payment_method_id = data.get('payment_method_id')
+            price = stripe.Price.retrieve(price_id)
+            old_subscription_id = data.get('old_subscription_id')
+
+            customer = CustomUser.objects.get(customer_id=customer_id)
+            if payment_method_id != customer.payment_method_id:
+                self.update_payment_method_id_in_db(customer=customer, new_payment_method_id=payment_method_id)
+
+            # Create a payment intent using the card token
+            # payment_intent = stripe.PaymentIntent.create(
+            #     amount=price.unit_amount,  # Amount in cents
+            #     currency="usd",
+            #     description="Payment for order",
+            #     payment_method_types=["card"],
+            #     payment_method_data={
+            #         "type": "card",
+            #         "card": {
+            #             "token": token  # Use the card token here
+            #         }
+            #     },
+            #     confirm=True
+            # )
+
+            subscription = stripe.Subscription.create(
+                customer=customer_id,
+                items=[
+                    {"price": price_id},
+                ],
+            )
+
+            self.update_current_plan_id_in_db(customer=customer, price_id=price_id)
+
+            if old_subscription_id:
+                stripe.Subscription.cancel(old_subscription_id)
+                self.update_subscription_id_in_db(customer=customer, new_subscription_id=subscription.id)
+            else:
+                self.update_subscription_id_in_db(customer=customer, new_subscription_id=subscription.id)
+
+            # Payment processed successfully
+            return JsonResponse({'success': True, 'subscription': subscription})
+        except stripe.error.CardError as e:
+            return JsonResponse({'error': str(e)})
+
+    def update_subscription_id_in_db(self, customer, new_subscription_id):
+        customer.subscription_id = new_subscription_id
+        customer.save()
+
+    def update_payment_method_id_in_db(self, customer, new_payment_method_id):
+        customer.payment_method_id = new_payment_method_id
+        customer.save()
+
+    def update_current_plan_id_in_db(self, customer, price_id):
+        customer.current_plan = price_id
+        customer.save()
