@@ -167,7 +167,7 @@ class UserRoleList(generics.ListCreateAPIView):
                 "city": user.city,
                 "zip_code": user.zip_code,
                 "country": user.country,
-                "current_plan": user.current_plan.id,
+                "current_plan": user.current_plan,
                 "joined": user.joined,
                 "role": role,
             })
