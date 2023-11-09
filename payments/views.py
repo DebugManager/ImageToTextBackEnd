@@ -14,6 +14,8 @@ from rest_framework import status
 from django.conf import settings
 import stripe
 
+from user.models import CustomUser
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
@@ -260,11 +262,63 @@ class WebhookReceivedView(View):
         return JsonResponse({'status': 'success'})
 
 
+# @method_decorator(csrf_exempt, name='dispatch')
+# class ProcessPaymentView(View):
+#     @method_decorator(require_POST)
+#     def post(self, request):
+#         # Parse the JSON data from the request body
+#         try:
+#             data = json.loads(request.body.decode("utf-8"))
+#             token = data.get('token')
+#             price_id = data.get('price_id')
+#             customer_id = data.get('customer_id')
+#             payment_method_id = data.get('payment_method_id')
+#             price = stripe.Price.retrieve(price_id)
+#             old_subscription_id = data.get('old_subscription_id')
+#
+#             if old_subscription_id:
+#                 stripe.Subscription.cancel(old_subscription_id)
+#
+#             # Create a payment intent using the card token
+#             payment_intent = stripe.PaymentIntent.create(
+#                 amount=price.unit_amount,  # Amount in cents
+#                 currency="usd",
+#                 description="Payment for order",
+#                 payment_method_types=["card"],
+#                 payment_method_data={
+#                     "type": "card",
+#                     "card": {
+#                         "token": token  # Use the card token here
+#                     }
+#                 },
+#                 confirm=True
+#             )
+#
+#             customer = stripe.Customer.modify(
+#                 customer_id,
+#                 invoice_settings=
+#                 {"default_payment_method": payment_method_id}
+#             )
+#
+#             subsription = stripe.Subscription.create(
+#                 customer=customer_id,
+#                 items=[
+#                     {"price": price_id,
+#                      },
+#                 ],
+#             )
+#
+#             # Payment processed successfully
+#             return JsonResponse({'success': True, 'intent': payment_intent, 'subsription': subsription})
+#         except stripe.error.CardError as e:
+#             # Payment error, return the error to the client
+#             return JsonResponse({'error': str(e)})
+#         # except
+
 @method_decorator(csrf_exempt, name='dispatch')
 class ProcessPaymentView(View):
     @method_decorator(require_POST)
     def post(self, request):
-        # Parse the JSON data from the request body
         try:
             data = json.loads(request.body.decode("utf-8"))
             token = data.get('token')
@@ -274,8 +328,9 @@ class ProcessPaymentView(View):
             price = stripe.Price.retrieve(price_id)
             old_subscription_id = data.get('old_subscription_id')
 
-            if old_subscription_id:
-                stripe.Subscription.cancel(old_subscription_id)
+            customer = CustomUser.objects.get(customer_id=customer_id)
+            if payment_method_id != customer.payment_method_id:
+                self.update_payment_method_id_in_db(customer=customer, new_payment_method_id=payment_method_id)
 
             # Create a payment intent using the card token
             payment_intent = stripe.PaymentIntent.create(
@@ -291,31 +346,29 @@ class ProcessPaymentView(View):
                 },
                 confirm=True
             )
-            # stripe.PaymentIntent.confirm(
-            #     payment_intent.id,
-            # )
-            # attach = stripe.PaymentMethod.attach(
-            #     "pm_1OACvMDV4Z1ssWPDZify6Yaq",
-            #     customer=customer_id,
-            # )
 
-            customer = stripe.Customer.modify(
-                customer_id,
-                invoice_settings=
-                {"default_payment_method": payment_method_id}
-            )
-
-            subsription = stripe.Subscription.create(
+            subscription = stripe.Subscription.create(
                 customer=customer_id,
                 items=[
-                    {"price": price_id,
-                     },
+                    {"price": price_id},
                 ],
             )
 
+            if old_subscription_id:
+                stripe.Subscription.cancel(old_subscription_id)
+                self.update_subscription_id_in_db(customer=customer, new_subscription_id=subscription.id)
+            else:
+                self.update_subscription_id_in_db(customer=customer, new_subscription_id=subscription.id)
+
             # Payment processed successfully
-            return JsonResponse({'success': True, 'intent': payment_intent, 'subsription': subsription})
+            return JsonResponse({'success': True, 'intent': payment_intent, 'subscription': subscription})
         except stripe.error.CardError as e:
-            # Payment error, return the error to the client
             return JsonResponse({'error': str(e)})
-        # except
+
+    def update_subscription_id_in_db(self, customer, new_subscription_id):
+        customer.subscription_id = new_subscription_id
+        customer.save()
+
+    def update_payment_method_id_in_db(self, customer, new_payment_method_id):
+        customer.payment_method_id = new_payment_method_id
+        customer.save()
