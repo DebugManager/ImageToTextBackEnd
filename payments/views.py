@@ -1,4 +1,5 @@
 import json
+import operator
 import os
 from datetime import datetime
 
@@ -383,9 +384,9 @@ class InvoiceTable(APIView):
         client_id = request.data.get('customer_id')
         try:
             invoice = stripe.Invoice.list(customer=client_id)
-            invoises = []
+            invoices = []
             for inv in invoice['data']:
-                invoises.append({
+                invoices.append({
                     'id': inv['id'],
                     'amount': inv['amount_paid'],
                     'crated_date': datetime.fromtimestamp(inv['lines']['data'][0]['period']['start']),
@@ -407,4 +408,8 @@ class InvoiceTable(APIView):
             # }
 
             # return JsonResponse({'customer': customer, 'payment': payment})
-        return JsonResponse({'data': invoises})
+
+        sort_field = request.GET.get('sort')
+        if sort_field in ['id', 'amount', 'created_date', 'paid_date', 'name', 'method', 'status']:
+            invoices.sort(key=lambda x: x[sort_field])
+        return JsonResponse({'data': invoices})
