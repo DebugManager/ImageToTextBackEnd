@@ -285,7 +285,7 @@ class ProcessPaymentView(View):
                 )
             except stripe.error.StripeError as e:
                 # Handle any errors
-                return JsonResponse({"Error:", str(e)})
+                return JsonResponse({"Error:": str(e)})
 
             customer = CustomUser.objects.get(customer_id=customer_id)
             if payment_method_id != customer.payment_method_id and payment_method_id:
