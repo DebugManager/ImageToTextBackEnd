@@ -507,6 +507,8 @@ class InvoiceDetail(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserInfoUpdate(APIView):
+    permission_classes = (AllowAny,)
+
     @method_decorator(require_POST)
     def post(self, request):
         try:
@@ -514,14 +516,14 @@ class UserInfoUpdate(APIView):
             customer_id = data.get('customer_id')
             first_name = data.get('first_name')
             last_name = data.get('last_name')
-            description = data.get('description')
+            # description = data.get('description')
             email = data.get('email')
             payment_method_id = data.get('payment_method_id')
 
             user = CustomUser.objects.get(customer_id=customer_id)
             user.first_name = first_name
             user.last_name = last_name
-            user.description = description
+            # user.description = description
             user.email = email
             if payment_method_id:
                 user.payment_method_id = payment_method_id
