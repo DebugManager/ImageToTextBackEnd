@@ -545,4 +545,4 @@ class UserInfoUpdate(APIView):
         except stripe.error.CardError as e:
             return JsonResponse({'error': str(e)})
 
-        return JsonResponse({'status': status.HTTP_200_OK})
+        return JsonResponse({'status': status.HTTP_200_OK, 'data': user})
