@@ -2,7 +2,7 @@ from django.urls import path
 
 from payments.views import GetConfigView, CreateCustomerView, CancelSubscriptionView, ListSubscriptionsView, \
     PreviewInvoiceView, UpdateSubscriptionView, ProcessPaymentView, GetUserWithProduct, GetPlanByIdView, \
-    GetAllSubscriptions, ProcessOnHoldView, InvoiceTable, OrderView, InvoiceDetail
+    GetAllSubscriptions, ProcessOnHoldView, InvoiceTable, OrderView, InvoiceDetail, UserInfoUpdate
 
 urlpatterns = [
     path('get_config/', GetConfigView.as_view()),
@@ -12,6 +12,7 @@ urlpatterns = [
     path('get-invoices/', InvoiceTable.as_view()),
     path('get-invoice-detail/', InvoiceDetail.as_view()),
     path('get-orders/', OrderView.as_view()),
+    path('update-user/', UserInfoUpdate.as_view()),
     # path('create-user/<str:customer_id>/', CreateCustomerView.as_view()),#todo
     path('get-user/', GetUserWithProduct.as_view()),
     path('cancel-subscription/', CancelSubscriptionView.as_view()),
