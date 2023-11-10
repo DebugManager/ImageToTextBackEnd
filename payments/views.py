@@ -505,5 +505,40 @@ class InvoiceDetail(APIView):
         return JsonResponse({'data': data})
 
 
-# @method_decorator(csrf_exempt, name='dispatch')
-# class UserInfoUpdate(APIView):
+@method_decorator(csrf_exempt, name='dispatch')
+class UserInfoUpdate(APIView):
+    @method_decorator(require_POST)
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            customer_id = data.get('customer_id')
+            first_name = data.get('first_name')
+            last_name = data.get('last_name')
+            description = data.get('description')
+            email = data.get('email')
+            payment_method_id = data.get('payment_method_id')
+
+            user = CustomUser.objects.get(customer_id=customer_id)
+            user.first_name = first_name
+            user.last_name = last_name
+            user.description = description
+            user.email = email
+            if payment_method_id:
+                user.payment_method_id = payment_method_id
+            user.save()
+            if payment_method_id:
+                stripe.PaymentMethod.attach(
+                    payment_method_id,
+                    customer=customer_id,
+                )
+                customer = stripe.Customer.modify(
+                    customer_id,
+                    email=email,
+                    name=f'{first_name} {last_name}',
+                    description=description,
+
+                    invoice_settings=
+                    {"default_payment_method": payment_method_id}
+                )
+        except stripe.error.CardError as e:
+            return JsonResponse({'error': str(e)})
