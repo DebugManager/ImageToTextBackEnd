@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
-from user.models import CustomUser, Ticket, ChatRoom, ChatMessage
+from user.models import CustomUser, Ticket, ChatRoom, ChatMessage, Affiliate
 from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer, \
     AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer, ChatRoomSerializer, \
     ChatMessageSerializer
@@ -389,8 +389,19 @@ class ChatMessagesView(generics.ListAPIView):
 class AffiliateEdit(APIView):
     def post(self, request):
         try:
+            affiliate_data = {
+                'promotion_plan': request.data.get('promotion_plan'),
+                'twitter': request.data.get('twitter'),
+                'instagram': request.data.get('instagram'),
+                'tiktok': request.data.get('tiktok'),
+                'linkedin': request.data.get('linkedin'),
+                'facebook': request.data.get('facebook'),
+                'paypal_email': request.data.get('paypal_email'),
+                'btc_adress': request.data.get('btc_adress'),
+            }
+
+            affiliate = Affiliate.objects.create(**affiliate_data)
             user_id = request.data.get('user_id')
-            affiliate_id = request.data.get('affiliate_id')
 
             user = CustomUser.objects.get(id=user_id)
 
@@ -398,11 +409,7 @@ class AffiliateEdit(APIView):
                 if field in request.data:
                     setattr(user, field, request.data[field])
 
-            affiliate = Affiliate.objects.get(id=affiliate_id)
-            for field in ['promotion_plan', 'twitter', 'instagram', 'tiktok', 'linkedin', 'facebook', 'paypal_email',
-                          'btc_adress']:
-                if field in request.data:
-                    setattr(affiliate, field, request.data[field])
+
 
             user.save()
             affiliate.save()
