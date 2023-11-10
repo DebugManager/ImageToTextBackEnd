@@ -276,6 +276,16 @@ class ProcessPaymentView(View):
             payment_method_id = data.get('payment_method_id')
             price = stripe.Price.retrieve(price_id)
             old_subscription_id = data.get('old_subscription_id')
+            try:
+                stripe.Customer.modify(
+                    customer_id,
+                    invoice_settings={
+                        "default_payment_method": payment_method_id
+                    }
+                )
+            except stripe.error.StripeError as e:
+                # Handle any errors
+                return JsonResponse({"Error:", str(e)})
 
             customer = CustomUser.objects.get(customer_id=customer_id)
             if payment_method_id != customer.payment_method_id and payment_method_id:
