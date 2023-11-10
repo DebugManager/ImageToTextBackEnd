@@ -276,6 +276,10 @@ class ProcessPaymentView(View):
             payment_method_id = data.get('payment_method_id')
             price = stripe.Price.retrieve(price_id)
             old_subscription_id = data.get('old_subscription_id')
+            stripe.PaymentMethod.attach(
+                payment_method_id,
+                customer=customer_id,
+            )
             customer = stripe.Customer.modify(
                 customer_id,
                 invoice_settings=
