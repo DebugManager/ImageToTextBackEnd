@@ -387,6 +387,8 @@ class ChatMessagesView(generics.ListAPIView):
 
 
 class AffiliateEdit(APIView):
+    permission_classes = (AllowAny,)
+
     def post(self, request):
         try:
             affiliate_data = {
@@ -408,8 +410,6 @@ class AffiliateEdit(APIView):
             for field in ['first_name', 'last_name', 'email']:
                 if field in request.data:
                     setattr(user, field, request.data[field])
-
-
 
             user.save()
             affiliate.save()
