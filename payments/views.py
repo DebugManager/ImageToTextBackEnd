@@ -537,10 +537,12 @@ class UserInfoUpdate(APIView):
                     customer_id,
                     email=email,
                     name=f'{first_name} {last_name}',
-                    description=description,
+                    # description=description,
 
                     invoice_settings=
                     {"default_payment_method": payment_method_id}
                 )
         except stripe.error.CardError as e:
             return JsonResponse({'error': str(e)})
+
+        return JsonResponse({'status': status.HTTP_200_OK})
