@@ -410,10 +410,9 @@ class AffiliateEdit(APIView):
             for field in ['first_name', 'last_name', 'email']:
                 if field in request.data:
                     setattr(user, field, request.data[field])
-
+            user.affiliate_id = affiliate
             user.save()
-            affiliate.save()
 
-            return Response({'success': 'Fields updated successfully'})
+            return Response({'success': affiliate.id})
         except Exception as e:
             return Response({'error': str(e)})
