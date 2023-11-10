@@ -18,6 +18,7 @@ from django.conf import settings
 import stripe
 
 from user.models import CustomUser
+from user.serializers import AllUserSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -544,5 +545,8 @@ class UserInfoUpdate(APIView):
                 )
         except stripe.error.CardError as e:
             return JsonResponse({'error': str(e)})
+        data = {
 
-        return JsonResponse({'status': status.HTTP_200_OK, 'data': user})
+        }
+
+        return JsonResponse({'status': status.HTTP_200_OK, 'data': AllUserSerializer(user).data})
