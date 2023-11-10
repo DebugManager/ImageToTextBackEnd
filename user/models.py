@@ -46,8 +46,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     company = models.ManyToManyField(Company, null=True, blank=True)
 
     phone = models.CharField(max_length=50, blank=True, null=True)
-    affiliate = models.BooleanField(default=False)
-    affiliate_code = models.CharField(max_length=20, null=True, blank=True)
+    # affiliate = models.BooleanField(default=False)
+    # affiliate_code = models.CharField(max_length=20, null=True, blank=True)
     status = models.CharField(max_length=50, default="Succes")
 
     # image_url = models.URLField()

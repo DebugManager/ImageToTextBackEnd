@@ -385,4 +385,28 @@ class ChatMessagesView(generics.ListAPIView):
         queryset = ChatMessage.objects.filter(room_id=room_id)
         return queryset
 
-# class
+
+class AffiliateEdit(APIView):
+    def post(self, request):
+        try:
+            user_id = request.data.get('user_id')
+            affiliate_id = request.data.get('affiliate_id')
+
+            user = CustomUser.objects.get(id=user_id)
+
+            for field in ['first_name', 'last_name', 'email']:
+                if field in request.data:
+                    setattr(user, field, request.data[field])
+
+            affiliate = Affiliate.objects.get(id=affiliate_id)
+            for field in ['promotion_plan', 'twitter', 'instagram', 'tiktok', 'linkedin', 'facebook', 'paypal_email',
+                          'btc_adress']:
+                if field in request.data:
+                    setattr(affiliate, field, request.data[field])
+
+            user.save()
+            affiliate.save()
+
+            return Response({'success': 'Fields updated successfully'})
+        except Exception as e:
+            return Response({'error': str(e)})
