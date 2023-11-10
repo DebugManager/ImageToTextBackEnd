@@ -481,6 +481,7 @@ class InvoiceDetail(APIView):
                 "currency": invoice['currency'],
                 "name": f'{customer.first_name} {customer.last_name}',
                 "address": customer.address_line1,
+                "email": customer.email,
                 "brand": stripe.Charge.retrieve(invoice['charge'])['payment_method_details']['card']['brand'],
                 "last4": stripe.Charge.retrieve(invoice['charge'])['payment_method_details']['card']['last4'],
                 "product_name": stripe.Product.retrieve(invoice['lines']['data'][0]['price']['product'])['name'],
