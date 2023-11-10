@@ -3,6 +3,7 @@ import operator
 import os
 from datetime import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -401,15 +402,98 @@ class InvoiceTable(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
 
-            # data = {
-            #     'payment_method': payment['card']['brand'],
-            #     'amount': price['unit_amount'],
-            #     'package':product['name']
-            # }
-
-            # return JsonResponse({'customer': customer, 'payment': payment})
-
         sort_field = request.GET.get('sort')
         if sort_field in ['id', 'amount', 'created_date', 'paid_date', 'name', 'method', 'status']:
             invoices.sort(key=lambda x: x[sort_field])
         return JsonResponse({'data': invoices})
+
+
+class OrderView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        charges = stripe.Charge.list()
+        orders = []
+
+        for charge in charges['data']:
+            if charge['customer']:
+                customer = CustomUser.objects.get(customer_id=charge['customer'])
+                # id name email package affiliate_code address price status country date
+                orders.append({
+                    "id": charge['id'],
+                    "name": f"{customer.first_name} {customer.last_name}",
+                    "email": customer.email,
+                    "package": stripe.Product.retrieve(
+                        stripe.Invoice.retrieve(charge['invoice'])['lines']['data'][0]['price']['product'])['name'],
+                    'affiliate_code': customer.affiliate_id,
+                    'address': customer.address_line1,
+                    'price': charge['payment_method_details']['card']['amount_authorized'],
+                    'status': charge['status'],
+                    'country': charge['payment_method_details']['card']['country'],
+                    'date': datetime.fromtimestamp(charge['created']),
+                })
+
+        search_query = request.GET.get('search')
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if search_query:
+            filtered_orders = [
+                order for order in orders
+                if (
+                        search_query in order['name'] or
+                        search_query in order['email'] or
+                        search_query in order['package'] or
+                        search_query in order['status']
+                )
+            ]
+        else:
+            if start_date_str and end_date_str:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                filtered_orders = [
+                    order for order in orders
+                    if start_date <= order['date'] <= end_date
+                ]
+            else:
+                filtered_orders = orders
+
+        sort_field = request.GET.get('sort')
+        if sort_field in ['id', 'name', 'email', 'package', 'affiliate_code', 'address', 'price', 'status', 'country',
+                          'date']:
+            filtered_orders.sort(key=lambda x: x[sort_field])
+        return JsonResponse({'data': orders})
+
+
+class InvoiceDetail(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        invoice_id = request.GET.get('invoice_id')
+        try:
+            invoice = stripe.Invoice.retrieve(invoice_id)
+            customer = CustomUser.objects.get(customer_id=invoice['customer'])
+            data = {
+                "id": invoice['id'],
+                "account_country": invoice['account_country'],
+                "account_name": invoice['account_name'],
+                "amount": invoice['amount_due'],
+                "created": datetime.fromtimestamp(invoice['created']),
+                "currency": invoice['currency'],
+                "name": f'{customer.first_name} {customer.last_name}',
+                "address": customer.address_line1,
+                "brand": stripe.Charge.retrieve(invoice['charge'])['payment_method_details']['card']['brand'],
+                "last4": stripe.Charge.retrieve(invoice['charge'])['payment_method_details']['card']['last4'],
+                "product_name": stripe.Product.retrieve(invoice['lines']['data'][0]['price']['product'])['name'],
+                "interval": invoice['lines']['data'][0]['price']['recurring']['interval'],
+                "description": invoice['lines']['data'][0]['description'],
+                "invoice_pdf": invoice['invoice_pdf']
+
+            }
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
+        return JsonResponse({'data': data})
+
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class UserInfoUpdate(APIView):
