@@ -280,11 +280,11 @@ class ProcessPaymentView(View):
                 payment_method_id,
                 customer=customer_id,
             )
-            customer = stripe.Customer.modify(
-                customer_id,
-                invoice_settings=
-                {"default_payment_method": payment_method_id}
-            )
+            # customer = stripe.Customer.modify(
+            #     customer_id,
+            #     invoice_settings=
+            #     {"default_payment_method": payment_method_id}
+            # )
 
             customer = CustomUser.objects.get(customer_id=customer_id)
             if payment_method_id != customer.payment_method_id and payment_method_id:
