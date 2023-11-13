@@ -434,7 +434,8 @@ class OrderView(APIView):
                 # id name email package affiliate_code address price status country date
                 orders.append({
                     "id": charge['id'],
-                    "name": f"{customer.first_name} {customer.last_name}",
+                    "first_name": customer.first_name,
+                    "last_name": customer.last_name,
                     "email": customer.email,
                     "package": stripe.Product.retrieve(
                         stripe.Invoice.retrieve(charge['invoice'])['lines']['data'][0]['price']['product'])['name'],
@@ -453,7 +454,8 @@ class OrderView(APIView):
             filtered_orders = [
                 order for order in orders
                 if (
-                        search_query in order['name'] or
+                        search_query in order['first_name'] or
+                        search_query in order['last_name'] or
                         search_query in order['email'] or
                         search_query in order['package'] or
                         search_query in order['status']
@@ -471,8 +473,8 @@ class OrderView(APIView):
                 filtered_orders = orders
 
         sort_field = request.GET.get('sort')
-        if sort_field in ['id', 'name', 'email', 'package', 'affiliate_code', 'address', 'price', 'status', 'country',
-                          'date']:
+        if sort_field in ['id', 'first_name', 'last_name', 'email', 'package', 'affiliate_code', 'address', 'price',
+                          'status', 'country', 'date']:
             filtered_orders.sort(key=lambda x: x[sort_field])
         return JsonResponse({'data': orders})
 
@@ -484,9 +486,24 @@ class OrderDetailView(APIView):
         data = json.loads(request.body.decode("utf-8"))
         order_id = data.get('order_id')
         charge = stripe.Charge.retrieve(order_id)
+        customer = CustomUser.objects.get(customer_id=charge['customer'])
         # orders = []
 
-        return JsonResponse({'data': charge})
+        data = {
+            "created": datetime.fromtimestamp(charge['created']),
+            "status": charge['status'],
+            "package": stripe.Product.retrieve(
+                stripe.Invoice.retrieve(charge['invoice'])['lines']['data'][0]['price']['product'])['name'],
+            "price": charge['payment_method_details']['card']['amount_authorized'],
+            "first_name": customer.last_name,
+            "last_name": customer.last_name,
+            "email": customer.email,
+            "country": customer.country,
+            "address": customer.address_line1
+
+        }
+
+        return JsonResponse({'data': data})
 
 
 class InvoiceDetail(APIView):
