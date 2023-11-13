@@ -430,7 +430,7 @@ class OrderView(APIView):
                 customer = CustomUser.objects.get(customer_id=charge['customer'])
                 affiliate_id = None
                 if customer.affiliate_id:  # Ensure it's not None before accessing the foreign key
-                    affiliate_id = customer.affiliate_id.id
+                    affiliate_id = customer.affiliate.id
                 # id name email package affiliate_code address price status country date
                 orders.append({
                     "id": charge['id'],
@@ -490,6 +490,7 @@ class OrderDetailView(APIView):
         # orders = []
 
         data = {
+            "id": order_id,
             "created": datetime.fromtimestamp(charge['created']),
             "status": charge['status'],
             "package": stripe.Product.retrieve(
