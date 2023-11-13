@@ -51,8 +51,8 @@ class AllUserForAdminSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
         fields = (
-        'id', 'first_name', 'last_name', 'email', 'phone', 'affiliate', 'affiliate_code', 'address_line1', 'status',
-        'country', 'joined')
+            'id', 'first_name', 'last_name', 'email', 'phone', 'affiliate_id', 'address_line1', 'status',
+            'country', 'joined')
 
 
 class UserForAdminUpdateSerializer(ModelSerializer):
