@@ -427,10 +427,13 @@ class OrderView(APIView):
 
         for charge in charges['data']:
             if charge['customer']:
-                customer = CustomUser.objects.get(customer_id=charge['customer'])
+                try:
+                    customer = CustomUser.objects.get(customer_id=charge['customer'])
+                except CustomUser.DoesNotExist:
+                    user = None
                 affiliate_id = None
                 if customer.affiliate_id:  # Ensure it's not None before accessing the foreign key
-                    affiliate_id = customer.affiliate.id
+                    affiliate_id = customer.affiliate_id.id
                 # id name email package affiliate_code address price status country date
                 orders.append({
                     "id": charge['id'],
