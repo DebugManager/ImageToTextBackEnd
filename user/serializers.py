@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from user.models import CustomUser, Ticket, ChatRoom, ChatMessage
+from user.models import CustomUser, Ticket, ChatRoom, ChatMessage, Affiliate
 from djoser.serializers import UserCreateSerializer
 
 
@@ -58,7 +58,7 @@ class AllUserForAdminSerializer(ModelSerializer):
 class UserForAdminUpdateSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate', 'id')
+        fields = ('first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate_id', 'id')
 
 
 class TicketForAdminSerializer(ModelSerializer):
@@ -95,4 +95,10 @@ class ChatRoomSerializer(ModelSerializer):
 class ChatMessageSerializer(ModelSerializer):
     class Meta:
         model = ChatMessage
+        fields = ('__all__')
+
+
+class AllAffiliateSerializer(ModelSerializer):
+    class Meta:
+        model = Affiliate
         fields = ('__all__')

@@ -17,8 +17,8 @@ from rest_framework import status
 from django.conf import settings
 import stripe
 
-from user.models import CustomUser
-from user.serializers import AllUserSerializer
+from user.models import CustomUser, Affiliate
+from user.serializers import AllUserSerializer, AllAffiliateSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -428,6 +428,9 @@ class OrderView(APIView):
         for charge in charges['data']:
             if charge['customer']:
                 customer = CustomUser.objects.get(customer_id=charge['customer'])
+                affiliate_id = None
+                if customer.affiliate_id:  # Ensure it's not None before accessing the foreign key
+                    affiliate_id = customer.affiliate_id.id
                 # id name email package affiliate_code address price status country date
                 orders.append({
                     "id": charge['id'],
@@ -435,8 +438,8 @@ class OrderView(APIView):
                     "email": customer.email,
                     "package": stripe.Product.retrieve(
                         stripe.Invoice.retrieve(charge['invoice'])['lines']['data'][0]['price']['product'])['name'],
-                    'affiliate_code': customer.affiliate_id,
-                    'address': customer.address_line1,
+                    'affiliate_code': affiliate_id,
+                    'address_line1': customer.address_line1,
                     'price': charge['payment_method_details']['card']['amount_authorized'],
                     'status': charge['status'],
                     'country': charge['payment_method_details']['card']['country'],
@@ -472,6 +475,18 @@ class OrderView(APIView):
                           'date']:
             filtered_orders.sort(key=lambda x: x[sort_field])
         return JsonResponse({'data': orders})
+
+
+class OrderDetailView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        order_id = data.get('order_id')
+        charge = stripe.Charge.retrieve(order_id)
+        # orders = []
+
+        return JsonResponse({'data': charge})
 
 
 class InvoiceDetail(APIView):
