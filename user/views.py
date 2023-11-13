@@ -418,6 +418,30 @@ class AffiliateEdit(APIView):
             return Response({'error': str(e)})
 
 
+class AffiliateListView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        affiliates = Affiliate.objects.all()
+        affiliates_list = []
+
+        for affiliate in affiliates:
+            current_users = affiliate.affiliated_users.all()
+
+            for current_user in current_users:
+                user_data = {
+                    "first_name": current_user.first_name,
+                    "email": current_user.email,
+                    "signed_up": affiliate.affiliated_users.count(),
+                    # "sales": Fetch sales data as needed
+                    # "commision": 20,  # Add commission details
+                    # "status": current_user.status,  # User status
+                    # "country": current_user.country,  # User country
+                    # "date": Some datetime field
+                }
+                affiliates_list.append(user_data)
+
+        return Response(affiliates_list)
 # class AffiliateListView(APIView):
 #     permission_classes = (AllowAny,)
 #

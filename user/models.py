@@ -20,8 +20,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     customer_id = models.CharField(max_length=100, default="Clear")
     payment_method_id = models.CharField(max_length=100, default=None, blank=True, null=True)
     subscription_id = models.CharField(max_length=100, default=None, blank=True, null=True)
-    affiliate = models.ForeignKey('Affiliate', on_delete=models.SET_NULL, null=True, blank=True)
+
+    affiliate_id = models.ForeignKey('Affiliate', on_delete=models.CASCADE, blank=True, null=True)
+
+    # affiliate = models.ForeignKey('Affiliate', on_delete=models.SET_NULL, null=True, blank=True)
     # affiliate_id = models.ForeignKey(Affiliate, on_delete=models.CASCADE, blank=True, null=True)
+
 
     objects = CustomUserManager()
     first_name = models.CharField(max_length=50)
