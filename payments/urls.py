@@ -12,7 +12,7 @@ urlpatterns = [
     path('get-invoices/', InvoiceTable.as_view()),
     path('get-invoice-detail/', InvoiceDetail.as_view()),
     path('get-orders/', OrderView.as_view()),
-    path('get-order-by-id', OrderDetailView.as_view()),
+    path('get-order-by-id/', OrderDetailView.as_view()),
 
     path('update-user/', UserInfoUpdate.as_view()),
     # path('create-user/<str:customer_id>/', CreateCustomerView.as_view()),#todo
