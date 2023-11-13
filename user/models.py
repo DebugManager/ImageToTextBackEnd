@@ -20,7 +20,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     customer_id = models.CharField(max_length=100, default="Clear")
     payment_method_id = models.CharField(max_length=100, default=None, blank=True, null=True)
     subscription_id = models.CharField(max_length=100, default=None, blank=True, null=True)
+
     affiliate_id = models.ForeignKey('Affiliate', on_delete=models.CASCADE, blank=True, null=True)
+
+    # affiliate = models.ForeignKey('Affiliate', on_delete=models.SET_NULL, null=True, blank=True)
+    # affiliate_id = models.ForeignKey(Affiliate, on_delete=models.CASCADE, blank=True, null=True)
+
 
     objects = CustomUserManager()
     first_name = models.CharField(max_length=50)
@@ -35,8 +40,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     company = models.ManyToManyField(Company, null=True, blank=True)
 
     phone = models.CharField(max_length=50, blank=True, null=True)
-    # affiliate = models.BooleanField(default=False)
-    # affiliate_code = models.CharField(max_length=20, null=True, blank=True)
     status = models.CharField(max_length=50, default="Succes")
 
     # image_url = models.URLField()

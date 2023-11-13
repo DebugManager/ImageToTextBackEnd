@@ -410,7 +410,7 @@ class AffiliateEdit(APIView):
             for field in ['first_name', 'last_name', 'email']:
                 if field in request.data:
                     setattr(user, field, request.data[field])
-            user.affiliate_id = affiliate
+            user.affiliate_id = affiliate.id
             user.save()
 
             return Response({'success': affiliate.id})
@@ -442,3 +442,14 @@ class AffiliateListView(APIView):
                 affiliates_list.append(user_data)
 
         return Response(affiliates_list)
+# class AffiliateListView(APIView):
+#     permission_classes = (AllowAny,)
+#
+#     def get(self, request):
+#         queryset = Affiliate.objects.all()
+#         affiliates = []
+#         for affiliate in queryset:
+#
+#             data = {
+#
+#             }
