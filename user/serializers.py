@@ -51,14 +51,14 @@ class AllUserForAdminSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
         fields = (
-            'id', 'first_name', 'last_name', 'email', 'phone', 'affiliate_id', 'address_line1', 'status',
+            'id', 'first_name', 'last_name', 'email', 'phone', 'affiliate', 'address_line1', 'status',
             'country', 'joined')
 
 
 class UserForAdminUpdateSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate_id', 'id')
+        fields = ('first_name', 'last_name', 'email', 'phone', 'address_line1', 'country', 'affiliate', 'id')
 
 
 class TicketForAdminSerializer(ModelSerializer):

@@ -7,17 +7,6 @@ from main.models import Plan, Company
 from .managers import CustomUserManager
 
 
-class Affiliate(models.Model):
-    promotion_plan = models.TextField(blank=True, null=True)
-    twitter = models.CharField(max_length=255, blank=True, null=True)
-    instagram = models.CharField(max_length=255, blank=True, null=True)
-    tiktok = models.CharField(max_length=255, blank=True, null=True)
-    linkedin = models.CharField(max_length=255, blank=True, null=True)
-    facebook = models.CharField(max_length=255, blank=True, null=True)
-    paypal_email = models.CharField(max_length=100, blank=True, null=True)
-    btc_adress = models.CharField(max_length=255, blank=True, null=True)
-
-
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = None
 
@@ -31,7 +20,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     customer_id = models.CharField(max_length=100, default="Clear")
     payment_method_id = models.CharField(max_length=100, default=None, blank=True, null=True)
     subscription_id = models.CharField(max_length=100, default=None, blank=True, null=True)
-    affiliate_id = models.ForeignKey(Affiliate, on_delete=models.CASCADE, blank=True, null=True)
+    affiliate = models.ForeignKey('Affiliate', on_delete=models.SET_NULL, null=True, blank=True)
+    # affiliate_id = models.ForeignKey(Affiliate, on_delete=models.CASCADE, blank=True, null=True)
 
     objects = CustomUserManager()
     first_name = models.CharField(max_length=50)
@@ -46,8 +36,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     company = models.ManyToManyField(Company, null=True, blank=True)
 
     phone = models.CharField(max_length=50, blank=True, null=True)
-    # affiliate = models.BooleanField(default=False)
-    # affiliate_code = models.CharField(max_length=20, null=True, blank=True)
     status = models.CharField(max_length=50, default="Succes")
 
     # image_url = models.URLField()
@@ -62,6 +50,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         permissions = [('view', 'Can view specific page'), ('edit', 'Can edit content'), ('comment', 'Can comment'),
                        ('create_new', 'Can create new user')]
+
+
+class Affiliate(models.Model):
+    promotion_plan = models.TextField(blank=True, null=True)
+    twitter = models.CharField(max_length=255, blank=True, null=True)
+    instagram = models.CharField(max_length=255, blank=True, null=True)
+    tiktok = models.CharField(max_length=255, blank=True, null=True)
+    linkedin = models.CharField(max_length=255, blank=True, null=True)
+    facebook = models.CharField(max_length=255, blank=True, null=True)
+    paypal_email = models.CharField(max_length=100, blank=True, null=True)
+    btc_adress = models.CharField(max_length=255, blank=True, null=True)
+    affiliated_users = models.ManyToManyField(CustomUser, related_name='affiliate_membership')
 
 
 class Feature(models.Model):
