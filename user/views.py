@@ -417,11 +417,13 @@ class AffiliateEdit(APIView):
             for field in ['first_name', 'last_name', 'email']:
                 if field in request.data:
                     setattr(user, field, request.data[field])
+            print(user.affiliate_id_id)
+            user.affiliate_id_id = affiliate
+            print(user.affiliate_id_id.id)
+            # user.affiliate_id = affiliate
+            # user.save()
 
-            user.affiliate_id = affiliate  # Assign the affiliate instance, not just the ID
-            user.save()
-
-            return Response({'success': affiliate.id})
+            return Response({'success': 200})#affiliate.id})
         # except ObjectDoesNotExist as e:
         #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
@@ -491,7 +493,7 @@ class AffiliateListView(APIView):
 class ApproveAffiliateView(APIView):
     permission_classes = (AllowAny,)
 
-    def post(self, request, affiliate_id):
+    def post(self, request):
         try:
             affiliate_id = request.data.get('affiliate_id'),
             affiliate = Affiliate.objects.get(id=affiliate_id)
@@ -502,6 +504,11 @@ class ApproveAffiliateView(APIView):
         affiliate.save()
 
         return JsonResponse({'message': 'Affiliate approved successfully'})
+
+    # def delete(self, request):
+    #     try:
+    #         affiliate_id = request.data.get('affiliate_id'),
+    #         affiliate = Affiliate.objects.get(id=affiliate_id)
 
 
 class AffiliateEditOrApprove(APIView):
@@ -534,3 +541,26 @@ class AffiliateEditOrApprove(APIView):
         #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+
+
+class GetAffiliateById(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        affiliate_id = request.data.get('affiliate_id')
+        affiliate = Affiliate.objects.get(id=affiliate_id)
+
+        data = {
+            "id": affiliate.id,
+            "first_name": affiliate.user.first_name,
+            "last_name": affiliate.user.last_name,
+            "email": affiliate.user.email,
+            # "users_signed_up": affiliated_users.count(),
+            # "sales": sales,  # todo
+            # "commission": sales // 10,  # Set default commission to 10%
+            "status": affiliate.approved,
+            "country": affiliate.user.country,
+            "created": affiliate.created
+        }
+
+        return Response(data)
