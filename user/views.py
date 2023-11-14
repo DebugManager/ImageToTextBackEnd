@@ -67,10 +67,11 @@ class CustomUserCreateView(CreateAPIView):
         affiliate_link = request.data.get('unique_link')
         if affiliate_link:
             try:
-                affiliate_id = decode_unique_link(affiliate_link)
-                affiliate = Affiliate.objects.get(id=affiliate_id)
+                # affiliate_id = decode_unique_link(affiliate_link)
                 encoded_id, _ = affiliate_link.split('-')
                 decoded_id = base64.urlsafe_b64decode(encoded_id).decode()
+
+                affiliate = Affiliate.objects.get(id=decoded_id)
 
                 customer = stripe.Customer.create(email=email, name=f'{first_name} {last_name}')
 
@@ -582,12 +583,13 @@ class AffiliateEditOrApprove(APIView):
                 affiliate_link = AffiliateLink.objects.create(affiliate=affiliate)
                 hostname = request.get_host()
                 generated_link = f'{hostname}/auth/{affiliate_link.unique_link}'
+                print(generated_link)
 
                 send_mail(
-                    'Affiliate Approval',
-                    f'Congratulations! Your affiliate account has been approved. Follow this link to sign up: {generated_link}',
-                    os.environ.get('EMAIL_USER'),
-                    [affiliate.user.email],  # List of recipient emails
+                    subject='Affiliate Approval',
+                    message=f'Congratulations! Your affiliate account has been approved. Follow this link to sign up: {generated_link}',
+                    from_email=os.environ.get('EMAIL_USER'),
+                    recipient_list=[affiliate.user.email],  # List of recipient emails
                     fail_silently=False,
                 )
             return Response({'success': 200})
