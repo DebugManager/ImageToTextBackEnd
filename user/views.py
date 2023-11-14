@@ -50,6 +50,9 @@ class CustomUserCreateView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         # Extract the fields from the request data
         email = request.data.get('email')
+        if CustomUser.objects.filter(email=email).exists():
+            response_data = {"error": "Email already exists in the database"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
 
@@ -499,3 +502,33 @@ class ApproveAffiliateView(APIView):
         affiliate.save()
 
         return JsonResponse({'message': 'Affiliate approved successfully'})
+
+
+class AffiliateEditOrApprove(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        try:
+            affiliate_id = request.data.get('affiliate_id')
+            affiliate = Affiliate.objects.get(id=affiliate_id)
+
+            if 'first_name' in request.data:
+                affiliate.user.first_name = request.data.get('first_name')
+            if 'last_name' in request.data:
+                affiliate.user.last_name = request.data.get('last_name')
+            if 'email' in request.data:
+                affiliate.user.email = request.data.get('email')
+            if 'country' in request.data:
+                affiliate.user.country = request.data.get('country')
+            if 'approved' in request.data:
+                affiliate.approved = request.data.get('approved')
+
+            # Save the changes
+            affiliate.user.save()
+            affiliate.save()
+
+            return Response({'success': affiliate})
+        # except ObjectDoesNotExist as e:
+        #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)

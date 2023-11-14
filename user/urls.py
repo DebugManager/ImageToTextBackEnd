@@ -4,7 +4,7 @@ from django.urls import path, include, re_path
 from user.views import CustomTokenCreateView, GrantPermissionView, UserRoleList, \
     CreateUserAndGrantPermissionView, UpdateUserAndPermissionsView, UserDetail, AllUsersForAdminView, \
     DetailUserForAdminView, AllTicketForAdminView, PersonalInfoUpdade, ChatRoomListCreateView, ChatRoomDetailView, \
-    ChatMessagesView, CustomUserCreateView, UserList, AffiliateEdit, AffiliateListView
+    ChatMessagesView, CustomUserCreateView, UserList, AffiliateEdit, AffiliateListView, AffiliateEditOrApprove
 
 urlpatterns = [
     path('v1/user-create-with-permissions/', CreateUserAndGrantPermissionView.as_view()),
@@ -18,6 +18,7 @@ urlpatterns = [
     path('v1/admin/users/<int:pk>/', DetailUserForAdminView.as_view()),
     path('v1/admin/ticket/', AllTicketForAdminView.as_view()),
     path('v1/admin/affiliates/', AffiliateListView.as_view()),
+    path('v1/admin/edit-approve-affiliate/', AffiliateEditOrApprove.as_view()),
     path('v1/create-room/', ChatRoomListCreateView.as_view()),
     path('v1/room/<str:name>/', ChatRoomDetailView.as_view()),
     path('v1/messages/<str:room_name>/', ChatMessagesView.as_view()),
