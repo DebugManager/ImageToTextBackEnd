@@ -527,7 +527,9 @@ class AffiliateEditOrApprove(APIView):
             affiliate.user.save()
             affiliate.save()
 
-            return Response({'success': affiliate})
+            # if affiliate.approved:
+
+            return Response({'success': 200})
         # except ObjectDoesNotExist as e:
         #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
