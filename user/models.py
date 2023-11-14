@@ -1,3 +1,6 @@
+import base64
+import uuid
+
 from django.utils import timezone
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
@@ -24,7 +27,14 @@ class Affiliate(models.Model):
 
 class AffiliateLink(models.Model):
     affiliate = models.ForeignKey(Affiliate, on_delete=models.CASCADE)
-    unique_link = models.CharField(max_length=100, unique=True)
+    unique_link = models.CharField(max_length=255, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.unique_link:
+            # Encode affiliate_id with a UUID
+            encoded_id = base64.urlsafe_b64encode(str(self.affiliate.id).encode()).decode()
+            self.unique_link = f"{encoded_id}-{uuid.uuid4().hex[:8]}"
+        super().save(*args, **kwargs)
 
 
 class AffiliatedUser(models.Model):
