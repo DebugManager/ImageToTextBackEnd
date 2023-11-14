@@ -1,5 +1,6 @@
 import stripe
 from django.contrib.auth.models import Permission
+from django.http import JsonResponse
 from django.utils import timezone
 from django_filters import DateFromToRangeFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -423,33 +424,47 @@ class AffiliateListView(APIView):
 
     def get(self, request):
         affiliates = Affiliate.objects.all()
-        affiliates_list = []
+        affiliate_data = []
 
         for affiliate in affiliates:
-            current_users = affiliate.affiliated_users.all()
+            affiliated_users = affiliate.affiliateduser_set.all()
+            sales = 0
+            if affiliated_users:
+                for affiliated_user in affiliated_users:
+                    sales += stripe.Price.retrieve(affiliated_user.user.current_plan)['unit_amount']
 
-            for current_user in current_users:
-                user_data = {
-                    "first_name": current_user.first_name,
-                    "email": current_user.email,
-                    "signed_up": affiliate.affiliated_users.count(),
-                    # "sales": Fetch sales data as needed
-                    # "commision": 20,  # Add commission details
-                    # "status": current_user.status,  # User status
-                    # "country": current_user.country,  # User country
-                    # "date": Some datetime field
-                }
-                affiliates_list.append(user_data)
+            data = {
+                "first_name": affiliate.user.first_name,
+                "last_name": affiliate.user.last_name,
+                "email": affiliate.user.email,
+                "users_signed_up": affiliated_users.count(),
+                "sales": sales, #todo
+                "commission": sales // 10,  # Set default commission to 10%
+                "status": affiliate.approved,
+                "country": affiliate.user.country
+            }
+            affiliate_data.append(data)
 
-        return Response(affiliates_list)
+        return JsonResponse({'affiliates': affiliate_data})
+#
 # class AffiliateListView(APIView):
 #     permission_classes = (AllowAny,)
 #
-#     def get(self, request):
-#         queryset = Affiliate.objects.all()
-#         affiliates = []
-#         for affiliate in queryset:
+#     def get(self, request, affiliate_id):
+#         # Retrieve the affiliate or return a 404 if it doesn't exist
+#         affiliate = get_object_or_404(Affiliate, id=affiliate_id)
 #
-#             data = {
+#         # Retrieve all users associated with this affiliate
+#         affiliate_users = CustomUser.objects.filter(affiliate=affiliate)
 #
+#         # Gather necessary data or fields
+#         users_data = []
+#         for user in affiliate_users:
+#             user_data = {
+#                 "first_name": user.first_name,
+#                 "email": user.email,
+#                 # Include other fields as needed
 #             }
+#             users_data.append(user_data)
+#
+#         return Response(users_data)
