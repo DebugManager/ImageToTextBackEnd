@@ -443,7 +443,8 @@ class AffiliateListView(APIView):
                 "sales": sales, #todo
                 "commission": sales // 10,  # Set default commission to 10%
                 "status": affiliate.approved,
-                "country": affiliate.user.country
+                "country": affiliate.user.country,
+                "created": affiliate.created
             }
             affiliate_data.append(data)
 
