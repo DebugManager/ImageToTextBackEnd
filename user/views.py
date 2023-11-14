@@ -418,7 +418,7 @@ class AffiliateEdit(APIView):
                 if field in request.data:
                     setattr(user, field, request.data[field])
 
-            user.affiliate = affiliate  # Assign the affiliate instance, not just the ID
+            user.affiliate_id = affiliate  # Assign the affiliate instance, not just the ID
             user.save()
 
             return Response({'success': affiliate.id})
