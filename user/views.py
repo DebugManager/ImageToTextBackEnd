@@ -488,7 +488,9 @@ class AffiliateListView(APIView):
             sales = 0
             if affiliated_users:
                 for affiliated_user in affiliated_users:
-                    sales += stripe.Price.retrieve(affiliated_user.user.current_plan)['unit_amount']
+                    try:
+                        sales += stripe.Price.retrieve(affiliated_user.user.current_plan)['unit_amount']
+                    except Exception: print("Hello")
 
             data = {
                 "id": affiliate.id,
