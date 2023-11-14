@@ -403,6 +403,7 @@ class AffiliateEdit(APIView):
                 'facebook': request.data.get('facebook'),
                 'paypal_email': request.data.get('paypal_email'),
                 'btc_adress': request.data.get('btc_adress'),
+                'user': request.data.get('user_id')
             }
 
             affiliate = Affiliate.objects.create(**affiliate_data)
@@ -478,3 +479,19 @@ class AffiliateListView(APIView):
             filtered_affiliate_user.sort(key=lambda x: x[sort_field])
 
         return JsonResponse({'affiliates': filtered_affiliate_user})
+
+
+class ApproveAffiliateView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request, affiliate_id):
+        try:
+            affiliate_id = request.data.get('affiliate_id'),
+            affiliate = Affiliate.objects.get(id=affiliate_id)
+        except Affiliate.DoesNotExist:
+            return JsonResponse({'error': 'Affiliate not found'}, status=404)
+
+        affiliate.approved = True
+        affiliate.save()
+
+        return JsonResponse({'message': 'Affiliate approved successfully'})
