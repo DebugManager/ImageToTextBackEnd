@@ -2,6 +2,7 @@ from datetime import datetime
 
 import stripe
 from django.contrib.auth.models import Permission
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.utils import timezone
 from django_filters import DateFromToRangeFilter, FilterSet
@@ -394,6 +395,9 @@ class AffiliateEdit(APIView):
 
     def post(self, request):
         try:
+            user_id = request.data.get('user_id')
+            user = CustomUser.objects.get(id=user_id)
+
             affiliate_data = {
                 'promotion_plan': request.data.get('promotion_plan'),
                 'twitter': request.data.get('twitter'),
@@ -403,23 +407,23 @@ class AffiliateEdit(APIView):
                 'facebook': request.data.get('facebook'),
                 'paypal_email': request.data.get('paypal_email'),
                 'btc_adress': request.data.get('btc_adress'),
-                'user': request.data.get('user_id')
+                'user': user
             }
 
             affiliate = Affiliate.objects.create(**affiliate_data)
-            user_id = request.data.get('user_id')
-
-            user = CustomUser.objects.get(id=user_id)
 
             for field in ['first_name', 'last_name', 'email']:
                 if field in request.data:
                     setattr(user, field, request.data[field])
-            user.affiliate_id = affiliate.id
+
+            user.affiliate = affiliate  # Assign the affiliate instance, not just the ID
             user.save()
 
             return Response({'success': affiliate.id})
+        except ObjectDoesNotExist as e:
+            return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
-            return Response({'error': str(e)})
+            return Response({'error': str(e)}, status=500)
 
 
 class AffiliateListView(APIView):
@@ -437,6 +441,7 @@ class AffiliateListView(APIView):
                     sales += stripe.Price.retrieve(affiliated_user.user.current_plan)['unit_amount']
 
             data = {
+                "id": affiliate.id,
                 "first_name": affiliate.user.first_name,
                 "last_name": affiliate.user.last_name,
                 "email": affiliate.user.email,
