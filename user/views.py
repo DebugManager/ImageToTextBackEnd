@@ -24,6 +24,8 @@ from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, Gran
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
+from user.utils import encode_unique_link
+
 
 class DateRangeFilter(FilterSet):
     created = DateFromToRangeFilter(field_name="created")
@@ -423,7 +425,7 @@ class AffiliateEdit(APIView):
             # user.affiliate_id = affiliate
             # user.save()
 
-            return Response({'success': 200})#affiliate.id})
+            return Response({'success': AllUserSerializer(user).data})#affiliate.id})
         # except ObjectDoesNotExist as e:
         #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
@@ -534,9 +536,10 @@ class AffiliateEditOrApprove(APIView):
             affiliate.user.save()
             affiliate.save()
 
-            # if affiliate.approved:
+            if affiliate.approved:
+                encoded_link = encode_unique_link(affiliate.id)
 
-            return Response({'success': 200})
+            return Response({'success': 200, 'link': encoded_link})
         # except ObjectDoesNotExist as e:
         #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
@@ -549,15 +552,20 @@ class GetAffiliateById(APIView):
     def post(self, request):
         affiliate_id = request.data.get('affiliate_id')
         affiliate = Affiliate.objects.get(id=affiliate_id)
+        sales = 0
+        affiliated_users = affiliate.affiliateduser_set.all()
+        if affiliated_users:
+            for affiliated_user in affiliated_users:
+                sales += stripe.Price.retrieve(affiliated_user.user.current_plan)['unit_amount']
 
         data = {
             "id": affiliate.id,
             "first_name": affiliate.user.first_name,
             "last_name": affiliate.user.last_name,
             "email": affiliate.user.email,
-            # "users_signed_up": affiliated_users.count(),
-            # "sales": sales,  # todo
-            # "commission": sales // 10,  # Set default commission to 10%
+            "users_signed_up": affiliated_users.count(),
+            "sales": sales,  # todo
+            "commission": sales // 10,
             "status": affiliate.approved,
             "country": affiliate.user.country,
             "created": affiliate.created
