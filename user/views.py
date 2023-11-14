@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import stripe
 from django.contrib.auth.models import Permission
 from django.http import JsonResponse
@@ -445,26 +447,33 @@ class AffiliateListView(APIView):
             }
             affiliate_data.append(data)
 
-        return JsonResponse({'affiliates': affiliate_data})
-#
-# class AffiliateListView(APIView):
-#     permission_classes = (AllowAny,)
-#
-#     def get(self, request, affiliate_id):
-#         # Retrieve the affiliate or return a 404 if it doesn't exist
-#         affiliate = get_object_or_404(Affiliate, id=affiliate_id)
-#
-#         # Retrieve all users associated with this affiliate
-#         affiliate_users = CustomUser.objects.filter(affiliate=affiliate)
-#
-#         # Gather necessary data or fields
-#         users_data = []
-#         for user in affiliate_users:
-#             user_data = {
-#                 "first_name": user.first_name,
-#                 "email": user.email,
-#                 # Include other fields as needed
-#             }
-#             users_data.append(user_data)
-#
-#         return Response(users_data)
+        search_query = request.GET.get('search')
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if search_query:
+            filtered_affiliate_user = [
+                affiliate_user for affiliate_user in affiliate_data
+                if (
+                        search_query in affiliate_user['first_name'] or
+                        search_query in affiliate_user['last_name'] or
+                        search_query in affiliate_user['email'] or
+                        search_query in affiliate_user['country']
+                )
+            ]
+        else:
+            if start_date_str and end_date_str:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                filtered_affiliate_user = [
+                    affiliate_user for affiliate_user in affiliate_data
+                    if start_date <= affiliate_user['date'] <= end_date
+                ]
+
+            else:
+                filtered_affiliate_user = affiliate_data
+        sort_field = request.GET.get('sort')
+        if sort_field in ['first_name', 'last_name', 'email', 'users_signed_up', 'sales', 'commission', 'status',
+                          'country']:
+            filtered_affiliate_user.sort(key=lambda x: x[sort_field])
+
+        return JsonResponse({'affiliates': filtered_affiliate_user})
