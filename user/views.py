@@ -590,7 +590,7 @@ class AffiliateEditOrApprove(APIView):
                 send_mail(
                     subject='Affiliate Approval',
                     message=f'Congratulations! Your affiliate account has been approved. Follow this link to sign up: {generated_link}',
-                    from_email=os.environ.get('EMAIL_USER'),
+                    from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
                     recipient_list=[affiliate.user.email],  # List of recipient emails
                     fail_silently=False,
                 )
