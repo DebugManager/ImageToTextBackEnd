@@ -1,8 +1,11 @@
+import base64
 from datetime import datetime
 
 import stripe
 from django.contrib.auth.models import Permission
+from django.core.mail import send_mail
 from django.http import JsonResponse
+from django.urls import reverse
 from django.utils import timezone
 from django_filters import DateFromToRangeFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -17,14 +20,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
-from user.models import CustomUser, Ticket, ChatRoom, ChatMessage, Affiliate
+from user.models import CustomUser, Ticket, ChatRoom, ChatMessage, Affiliate, AffiliateLink, AffiliatedUser
 from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer, \
     AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer, ChatRoomSerializer, \
     ChatMessageSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from user.utils import encode_unique_link
+from user.utils import encode_unique_link, decode_unique_link
 
 
 class DateRangeFilter(FilterSet):
@@ -58,30 +61,67 @@ class CustomUserCreateView(CreateAPIView):
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
 
-        # Create a Stripe customer and obtain the customer ID
-        customer = stripe.Customer.create(email=email, name=f'{first_name} {last_name}')  # todo
+        affiliate_link = request.data.get('unique_link')
+        if affiliate_link:
+            try:
+                affiliate_id = decode_unique_link(affiliate_link)
+                affiliate = Affiliate.objects.get(id=affiliate_id)
+                encoded_id, _ = affiliate_link.split('-')
+                decoded_id = base64.urlsafe_b64decode(encoded_id).decode()
 
-        # Create a user model instance with the provided fields
-        user = CustomUser(
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            customer_id=customer.id,  # Store the customer ID from Stripe
-            # You can add other fields here if needed
-        )
-        user.set_password(request.data.get('password'))  # Set the user's password
+                customer = stripe.Customer.create(email=email, name=f'{first_name} {last_name}')
 
-        # Save the user to the database
-        user.save()
+                # Update the user to become an affiliate
+                user = CustomUser.objects.create(
+                    email=email,
+                    first_name=request.data.get('first_name'),
+                    last_name=request.data.get('last_name'),
+                    customer_id=stripe.Customer.create(email=email,
+                                                       name=f'{request.data.get("first_name")} {request.data.get("last_name")}').id,
+                )
+                user.set_password(request.data.get('password'))
 
-        # Customize the response data if needed
-        response_data = {
-            "user_id": user.id,
-            "email": user.email,
-            "customer_id": customer.id,  # Include the customer ID from Stripe
-            "message": "User registered successfully",
-        }
-        return Response(response_data, status=status.HTTP_201_CREATED)
+                # Create an affiliated user for the affiliate
+                AffiliatedUser.objects.create(user=user, affiliate=affiliate)
+
+                response_data = {
+                    "user_id": user.id,
+                    "email": user.email,
+                    "customer_id": user.customer_id,
+                    "message": "User registered successfully as an affiliated user",
+                }
+                return Response(response_data, status=status.HTTP_201_CREATED)
+
+            except AffiliateLink.DoesNotExist:
+                # Handle the case when the affiliate link is not valid
+                response_data = {"error": "Invalid affiliate link"}
+                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            # Create a Stripe customer and obtain the customer ID
+            customer = stripe.Customer.create(email=email, name=f'{first_name} {last_name}')
+
+            # Create a user model instance with the provided fields
+            user = CustomUser(
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                customer_id=customer.id,  # Store the customer ID from Stripe
+                # You can add other fields here if needed
+            )
+            user.set_password(request.data.get('password'))
+
+            # Save the user to the database
+            user.save()
+
+            # Customize the response data if needed
+            response_data = {
+                "user_id": user.id,
+                "email": user.email,
+                "customer_id": customer.id,  # Include the customer ID from Stripe
+                "message": "User registered successfully",
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 #
@@ -425,7 +465,7 @@ class AffiliateEdit(APIView):
             # user.affiliate_id = affiliate
             # user.save()
 
-            return Response({'success': AllUserSerializer(user).data})#affiliate.id})
+            return Response({'success': AllUserSerializer(user).data})  # affiliate.id})
         # except ObjectDoesNotExist as e:
         #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
@@ -452,7 +492,7 @@ class AffiliateListView(APIView):
                 "last_name": affiliate.user.last_name,
                 "email": affiliate.user.email,
                 "users_signed_up": affiliated_users.count(),
-                "sales": sales, #todo
+                "sales": sales,
                 "commission": sales // 10,  # Set default commission to 10%
                 "status": affiliate.approved,
                 "country": affiliate.user.country,
@@ -535,11 +575,19 @@ class AffiliateEditOrApprove(APIView):
             # Save the changes
             affiliate.user.save()
             affiliate.save()
-
             if affiliate.approved:
-                encoded_link = encode_unique_link(affiliate.id)
+                affiliate_link = AffiliateLink.objects.create(affiliate=affiliate)
+                hostname = request.get_host()
+                generated_link = f'{hostname}/auth/{affiliate_link.unique_link}'
 
-            return Response({'success': 200, 'link': encoded_link})
+                send_mail(
+                    'Affiliate Approval',
+                    f'Congratulations! Your affiliate account has been approved. Follow this link to sign up: {generated_link}',
+                    settings.EMAIL_HOST_USER,  # Sender's email
+                    [affiliate.user.email],  # List of recipient emails
+                    fail_silently=False,
+                )
+            return Response({'success': 200})
         # except ObjectDoesNotExist as e:
         #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
