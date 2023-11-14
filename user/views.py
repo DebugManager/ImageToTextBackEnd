@@ -1,4 +1,5 @@
 import base64
+import os
 from datetime import datetime
 
 import stripe
@@ -13,6 +14,7 @@ from djoser.conf import settings
 from djoser import utils
 from djoser.views import TokenCreateView
 from djoser.views import UserViewSet
+from dotenv import load_dotenv
 
 from rest_framework import generics, status, filters
 from rest_framework.generics import get_object_or_404, CreateAPIView
@@ -29,6 +31,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from user.utils import encode_unique_link, decode_unique_link
 
+load_dotenv()
 
 class DateRangeFilter(FilterSet):
     created = DateFromToRangeFilter(field_name="created")
@@ -583,7 +586,7 @@ class AffiliateEditOrApprove(APIView):
                 send_mail(
                     'Affiliate Approval',
                     f'Congratulations! Your affiliate account has been approved. Follow this link to sign up: {generated_link}',
-                    settings.EMAIL_HOST_USER,  # Sender's email
+                    os.environ.get('DEFAULT_FROM_EMAIL'),  # Sender's email
                     [affiliate.user.email],  # List of recipient emails
                     fail_silently=False,
                 )
