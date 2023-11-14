@@ -2,7 +2,6 @@ from datetime import datetime
 
 import stripe
 from django.contrib.auth.models import Permission
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.utils import timezone
 from django_filters import DateFromToRangeFilter, FilterSet
@@ -420,8 +419,8 @@ class AffiliateEdit(APIView):
             user.save()
 
             return Response({'success': affiliate.id})
-        except ObjectDoesNotExist as e:
-            return Response({'error': f'Object not found: {str(e)}'}, status=404)
+        # except ObjectDoesNotExist as e:
+        #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 
