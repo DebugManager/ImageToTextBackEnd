@@ -5,7 +5,7 @@ from user.views import CustomTokenCreateView, GrantPermissionView, UserRoleList,
     CreateUserAndGrantPermissionView, UpdateUserAndPermissionsView, UserDetail, AllUsersForAdminView, \
     DetailUserForAdminView, AllTicketForAdminView, PersonalInfoUpdade, ChatRoomListCreateView, ChatRoomDetailView, \
     ChatMessagesView, CustomUserCreateView, UserList, AffiliateEdit, AffiliateListView, AffiliateEditOrApprove, \
-    GetAffiliateById
+    GetAffiliateById, NotificationCreateList
 
 urlpatterns = [
     path('v1/user-create-with-permissions/', CreateUserAndGrantPermissionView.as_view()),
@@ -15,6 +15,7 @@ urlpatterns = [
     path('v1/users/grant-permission/', GrantPermissionView.as_view()),
     path('v1/choose-plan/<int:pk>/', PersonalInfoUpdade.as_view()),
     path('v1/auth/token/create/', CustomTokenCreateView.as_view()),
+    path('v1/notification/', NotificationCreateList.as_view()),
     path('v1/admin/users/', AllUsersForAdminView.as_view()),
     path('v1/admin/users/<int:pk>/', DetailUserForAdminView.as_view()),
     path('v1/admin/ticket/', AllTicketForAdminView.as_view()),

@@ -22,16 +22,18 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
-from user.models import CustomUser, Ticket, ChatRoom, ChatMessage, Affiliate, AffiliateLink, AffiliatedUser
+from user.models import CustomUser, Ticket, ChatRoom, ChatMessage, Affiliate, AffiliateLink, AffiliatedUser, \
+    Notification
 from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer, \
     AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer, ChatRoomSerializer, \
-    ChatMessageSerializer
+    ChatMessageSerializer, AllNotificationSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from user.utils import encode_unique_link, decode_unique_link
 
 load_dotenv()
+
 
 class DateRangeFilter(FilterSet):
     created = DateFromToRangeFilter(field_name="created")
@@ -490,7 +492,8 @@ class AffiliateListView(APIView):
                 for affiliated_user in affiliated_users:
                     try:
                         sales += stripe.Price.retrieve(affiliated_user.user.current_plan)['unit_amount']
-                    except Exception: print("Hello")
+                    except Exception:
+                        print("Hello")
 
             data = {
                 "id": affiliate.id,
@@ -627,3 +630,25 @@ class GetAffiliateById(APIView):
         }
 
         return Response(data)
+
+
+class NotificationCreateList(generics.ListCreateAPIView):
+    queryset = Notification.objects.all()
+    serializer_class = AllNotificationSerializer
+    permission_classes = (AllowAny,)
+
+
+class NotificationMark(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        user_id = request.data.get('user_id')
+        notification_id = request.data.get('notification_id')
+
+        user = CustomUser.objects.get(id=user_id)
+        notification = Notification.objects.get(id=notification_id)
+
+        user.readed_notification.add(notification)
+        user.save()
+
+        return Response({'status': 200})
