@@ -609,4 +609,4 @@ class NotificationMark(APIView):
         user.readed_notification.add(notification)
         user.save()
 
-        return Response({'status': 200})
+        return Response({'user': user})
