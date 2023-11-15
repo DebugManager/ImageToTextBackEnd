@@ -609,4 +609,4 @@ class NotificationMark(APIView):
         user.readed_notification.add(notification)
         user.save()
 
-        return Response({'user': user})
+        return Response({'user': AllUserSerializer(user).data})
