@@ -38,29 +38,30 @@ class GetConfigView(APIView):
             serialized_prices = []
             for price in prices:
                 product_name = stripe.Product.retrieve(id=price.product)
-                serialized_prices.append({
-                    'id': price.id,
-                    'object': price.object,
-                    'active': price.active,
-                    'billing_scheme': price.billing_scheme,
-                    'created': price.created,
-                    'custom_unit_amount': price.custom_unit_amount,
-                    'livemode': price.livemode,
-                    'lookup_key': price.lookup_key,
-                    'metadata': price.metadata,
-                    'nickname': price.nickname,
-                    'product': price.product,
-                    'currency': price.currency,
-                    'recurring': price.recurring,
-                    'tax_behavior': price.tax_behavior,
-                    'tiers_mode': price.tiers_mode,
-                    'transform_quantity': price.transform_quantity,
-                    'type': price.type,
-                    'unit_amount': price.unit_amount,
-                    'unit_amount_decimal': price.unit_amount_decimal,
-                    'product_name': product_name.name,
-                    'options': product_name.features,
-                })
+                if product_name.active:
+                    serialized_prices.append({
+                        'id': price.id,
+                        'object': price.object,
+                        'active': price.active,
+                        'billing_scheme': price.billing_scheme,
+                        'created': price.created,
+                        'custom_unit_amount': price.custom_unit_amount,
+                        'livemode': price.livemode,
+                        'lookup_key': price.lookup_key,
+                        'metadata': price.metadata,
+                        'nickname': price.nickname,
+                        'product': price.product,
+                        'currency': price.currency,
+                        'recurring': price.recurring,
+                        'tax_behavior': price.tax_behavior,
+                        'tiers_mode': price.tiers_mode,
+                        'transform_quantity': price.transform_quantity,
+                        'type': price.type,
+                        'unit_amount': price.unit_amount,
+                        'unit_amount_decimal': price.unit_amount_decimal,
+                        'product_name': product_name.name,
+                        'options': product_name.features,
+                    })
 
             return Response({
                 'publishableKey': settings.STRIPE_PUBLISHABLE_KEY,
