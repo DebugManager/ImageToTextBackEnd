@@ -43,6 +43,11 @@ class AffiliatedUser(models.Model):
     # Additional fields specific to the affiliated user
 
 
+class Notification(models.Model):
+    text = models.TextField()
+    data = models.DateTimeField(auto_now_add=True, editable=False)
+
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = None
 
@@ -76,6 +81,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     phone = models.CharField(max_length=50, blank=True, null=True)
     status = models.CharField(max_length=50, default="Succes")
+
+    readed_notification = models.ManyToManyField(Notification, null=True, blank=True)
 
     # image_url = models.URLField()
 
