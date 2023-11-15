@@ -1,15 +1,12 @@
 import json
-import operator
 import os
 from datetime import datetime
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -17,8 +14,8 @@ from rest_framework import status
 from django.conf import settings
 import stripe
 
-from user.models import CustomUser, Affiliate
-from user.serializers import AllUserSerializer, AllAffiliateSerializer
+from user.models import CustomUser
+from user.serializers import AllUserSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -28,7 +25,6 @@ class GetConfigView(APIView):
 
     def get(self, request):
         try:
-            # Retrieves prices based on the interval query parameter
             interval = request.GET.get('interval', None)
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -39,7 +35,6 @@ class GetConfigView(APIView):
 
             prices = stripe.Price.list(**params)
 
-            # Serialize the prices data
             serialized_prices = []
             for price in prices:
                 product_name = stripe.Product.retrieve(id=price.product)
@@ -65,7 +60,6 @@ class GetConfigView(APIView):
                     'unit_amount_decimal': price.unit_amount_decimal,
                     'product_name': product_name.name,
                     'options': product_name.features,
-                    # Add other fields you need here
                 })
 
             return Response({
@@ -321,7 +315,6 @@ class ProcessPaymentView(View):
             else:
                 self.update_subscription_id_in_db(customer=customer, new_subscription_id=subscription.id)
 
-            # Payment processed successfully
             return JsonResponse({'success': True, 'intent': payment_intent, 'subscription': subscription})
         except stripe.error.CardError as e:
             return JsonResponse({'error': str(e)})
@@ -370,7 +363,6 @@ class ProcessOnHoldView(View):
             else:
                 self.update_subscription_id_in_db(customer=customer, new_subscription_id=subscription.id)
 
-            # Payment processed successfully
             return JsonResponse({'success': True, 'subscription': subscription})
         except stripe.error.CardError as e:
             return JsonResponse({'error': str(e)})
@@ -432,9 +424,8 @@ class OrderView(APIView):
                 except CustomUser.DoesNotExist:
                     user = None
                 affiliate_id = None
-                if customer.affiliate_id:  # Ensure it's not None before accessing the foreign key
+                if customer.affiliate_id:
                     affiliate_id = customer.affiliate_id.id
-                # id name email package affiliate_code address price status country date
                 orders.append({
                     "id": charge['id'],
                     "first_name": customer.first_name,
@@ -490,7 +481,6 @@ class OrderDetailView(APIView):
         order_id = data.get('order_id')
         charge = stripe.Charge.retrieve(order_id)
         customer = CustomUser.objects.get(customer_id=charge['customer'])
-        # orders = []
 
         data = {
             "id": order_id,
@@ -553,14 +543,12 @@ class UserInfoUpdate(APIView):
             customer_id = data.get('customer_id')
             first_name = data.get('first_name')
             last_name = data.get('last_name')
-            # description = data.get('description')
             email = data.get('email')
             payment_method_id = data.get('payment_method_id')
 
             user = CustomUser.objects.get(customer_id=customer_id)
             user.first_name = first_name
             user.last_name = last_name
-            # user.description = description
             user.email = email
             if payment_method_id:
                 user.payment_method_id = payment_method_id
@@ -574,15 +562,11 @@ class UserInfoUpdate(APIView):
                     customer_id,
                     email=email,
                     name=f'{first_name} {last_name}',
-                    # description=description,
 
                     invoice_settings=
                     {"default_payment_method": payment_method_id}
                 )
         except stripe.error.CardError as e:
             return JsonResponse({'error': str(e)})
-        data = {
-
-        }
 
         return JsonResponse({'status': status.HTTP_200_OK, 'data': AllUserSerializer(user).data})

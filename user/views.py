@@ -4,9 +4,9 @@ from datetime import datetime
 
 import stripe
 from django.contrib.auth.models import Permission
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.http import JsonResponse
-from django.urls import reverse
 from django.utils import timezone
 from django_filters import DateFromToRangeFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -29,8 +29,6 @@ from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, Gran
     ChatMessageSerializer, AllNotificationSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
-
-from user.utils import encode_unique_link, decode_unique_link
 
 load_dotenv()
 
@@ -58,7 +56,6 @@ class CustomUserCreateView(CreateAPIView):
     permission_classes = (AllowAny,)
 
     def create(self, request, *args, **kwargs):
-        # Extract the fields from the request data
         email = request.data.get('email')
         if CustomUser.objects.filter(email=email).exists():
             response_data = {"error": "Email already exists in the database"}
@@ -69,7 +66,6 @@ class CustomUserCreateView(CreateAPIView):
         affiliate_link = request.data.get('unique_link')
         if affiliate_link:
             try:
-                # affiliate_id = decode_unique_link(affiliate_link)
                 encoded_id, _ = affiliate_link.split('-')
                 decoded_id = base64.urlsafe_b64decode(encoded_id).decode()
 
@@ -112,15 +108,13 @@ class CustomUserCreateView(CreateAPIView):
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
-                customer_id=customer.id,  # Store the customer ID from Stripe
+                customer_id=customer.id,
                 # You can add other fields here if needed
             )
             user.set_password(request.data.get('password'))
 
-            # Save the user to the database
             user.save()
 
-            # Customize the response data if needed
             response_data = {
                 "user_id": user.id,
                 "email": user.email,
@@ -128,28 +122,6 @@ class CustomUserCreateView(CreateAPIView):
                 "message": "User registered successfully",
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
-
-
-#
-# class CustomUserCreateView(UserViewSet):
-#     permission_classes = (AllowAny,)
-#
-#     def create(self, request, *args, **kwargs):
-#         user_serializer = self.get_serializer(data=request.data)
-#         customer = stripe.Customer.create(email=request.data['email'])
-#
-#         user_serializer.is_valid(raise_exception=True)
-#         user_serializer.save()
-#         # You can add custom logic here, e.g., sending a welcome email
-#         user = user_serializer.instance
-#         # Customize the response data if needed
-#         response_data = {
-#             "user_id": user.id,
-#             "email": user.email,
-#             "customer": customer,
-#             "message": "User registered successfully",
-#         }
-#         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -294,15 +266,10 @@ class CreateUserAndGrantPermissionView(generics.CreateAPIView):
     serializer_class = AllUserSerializer
     permission_classes = (AllowAny,)
 
-    # filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    # search_fields = ['email', 'first_name', 'last_name']
-    # ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name', 'type']
-
     def perform_create(self, serializer):
         user = serializer.save()
         # Set the user's password and hash it
         user.set_password(self.request.data.get('password'))
-        # Save any additional user data
         user.joined = timezone.now()
         is_superuser = self.request.data.get('is_superuser', False)
         is_staff = self.request.data.get('is_staff', False)
@@ -342,10 +309,10 @@ class UpdateUserAndPermissionsView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AllUserSerializer
     permission_classes = (AllowAny,)
-    lookup_field = 'pk'  # The primary key lookup field
+    lookup_field = 'pk'
 
     def partial_update(self, request, *args, **kwargs):
-        user_id = kwargs.get('pk')  # Extract user ID from URL parameter
+        user_id = kwargs.get('pk')
         user = get_object_or_404(CustomUser, id=user_id)
 
         # Extract user data and permissions from the request
@@ -360,7 +327,7 @@ class UpdateUserAndPermissionsView(generics.UpdateAPIView):
             return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Grant or revoke permissions
-        user.user_permissions.clear()  # Remove all existing permissions
+        user.user_permissions.clear()
         for permission_id in permissions_to_grant:
             permission = get_object_or_404(Permission, pk=permission_id)
             user.user_permissions.add(permission)
@@ -391,13 +358,10 @@ class AllTicketForAdminView(generics.ListCreateAPIView):
     search_fields = ['subject', 'website', 'description']
     ordering_fields = ['website', 'site_code', 'id', 'user__first_name', 'user__last_name', 'user__email', 'status',
                        'user_id']
-    filterset_class = DateRangeFilter  # Apply the custom filter
+    filterset_class = DateRangeFilter
 
     def get_queryset(self):
         queryset = super().get_queryset()
-
-        # Apply additional filtering based on your needs
-        # For example, you can filter the queryset using request data
 
         date_range = self.request.query_params.get("date_range")
         if date_range:
@@ -426,16 +390,13 @@ class ChatMessagesView(generics.ListAPIView):
     permission_classes = (AllowAny,)
 
     def get_queryset(self):
-        # Get the room name from the URL parameter
         room_name = self.kwargs['room_name']
 
-        # Retrieve the room_id associated with the room_name
         try:
             room_id = ChatRoom.objects.get(name=room_name).id
         except ChatRoom.DoesNotExist:
             room_id = None
 
-        # Filter messages based on the room_id
         queryset = ChatMessage.objects.filter(room_id=room_id)
         return queryset
 
@@ -468,12 +429,10 @@ class AffiliateEdit(APIView):
             print(user.affiliate_id_id)
             user.affiliate_id_id = affiliate
             print(user.affiliate_id_id.id)
-            # user.affiliate_id = affiliate
-            # user.save()
 
             return Response({'success': AllUserSerializer(user).data})  # affiliate.id})
-        # except ObjectDoesNotExist as e:
-        #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
+        except ObjectDoesNotExist as e:
+            return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 
@@ -502,7 +461,7 @@ class AffiliateListView(APIView):
                 "email": affiliate.user.email,
                 "users_signed_up": affiliated_users.count(),
                 "sales": sales,
-                "commission": sales // 10,  # Set default commission to 10%
+                "commission": sales // 10,  # todo
                 "status": affiliate.approved,
                 "country": affiliate.user.country,
                 "created": affiliate.created
@@ -581,7 +540,6 @@ class AffiliateEditOrApprove(APIView):
             if 'approved' in request.data:
                 affiliate.approved = request.data.get('approved')
 
-            # Save the changes
             affiliate.user.save()
             affiliate.save()
             if affiliate.approved:
@@ -598,8 +556,8 @@ class AffiliateEditOrApprove(APIView):
                     fail_silently=False,
                 )
             return Response({'success': 200})
-        # except ObjectDoesNotExist as e:
-        #     return Response({'error': f'Object not found: {str(e)}'}, status=404)
+        except ObjectDoesNotExist as e:
+            return Response({'error': f'Object not found: {str(e)}'}, status=404)
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 
@@ -622,7 +580,7 @@ class GetAffiliateById(APIView):
             "last_name": affiliate.user.last_name,
             "email": affiliate.user.email,
             "users_signed_up": affiliated_users.count(),
-            "sales": sales,  # todo
+            "sales": sales,
             "commission": sales // 10,
             "status": affiliate.approved,
             "country": affiliate.user.country,

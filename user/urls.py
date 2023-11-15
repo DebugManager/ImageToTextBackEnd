@@ -4,7 +4,7 @@ from django.urls import path, include, re_path
 from user.views import CustomTokenCreateView, GrantPermissionView, UserRoleList, \
     CreateUserAndGrantPermissionView, UpdateUserAndPermissionsView, UserDetail, AllUsersForAdminView, \
     DetailUserForAdminView, AllTicketForAdminView, PersonalInfoUpdade, ChatRoomListCreateView, ChatRoomDetailView, \
-    ChatMessagesView, CustomUserCreateView, UserList, AffiliateEdit, AffiliateListView, AffiliateEditOrApprove, \
+    ChatMessagesView, CustomUserCreateView, AffiliateEdit, AffiliateListView, AffiliateEditOrApprove, \
     GetAffiliateById, NotificationCreateList, NotificationMark
 
 urlpatterns = [

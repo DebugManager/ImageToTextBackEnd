@@ -1,7 +1,5 @@
 import cloudinary.uploader
-import django_filters
-import stripe
-from django.shortcuts import render
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, filters
 from rest_framework.parsers import MultiPartParser, JSONParser
@@ -35,31 +33,6 @@ class PlanList(generics.ListCreateAPIView):
     permission_classes = (AllowAny,)
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['type']
-
-# class PlanList(APIView):
-#     def get(self, request):
-#         # Set your Stripe API key
-#         stripe.api_key = settings.STRIPE_API_KEY
-#
-#         try:
-#             # Fetch all prices from Stripe
-#             prices = stripe.Price.list()
-#             price_data = []
-#
-#             for price in prices.data:
-#                 price_data.append({
-#                     "id": price.id,
-#                     "nickname": price.nickname,
-#                     "unit_amount": price.unit_amount,
-#                     "currency": price.currency,
-#                     "product_id": price.product,
-#                     "interval": price.recurring.interval,
-#                 })
-#
-#             return JsonResponse({"prices": price_data})
-#         except Exception as e:
-#             return JsonResponse({"error": str(e)})
-
 
 
 class PlanDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -159,16 +132,13 @@ class SupportPostCreateView(APIView):
     parser_classes = (MultiPartParser, JSONParser)
 
     def post(self, request):
-        # Get data from the request
         collum_title = request.data.get('collum_title')
         title = request.data.get('title')
         description = request.data.get('description')
         file = request.data.get('picture')
 
-        # Upload the image to Cloudinary
         upload_data = cloudinary.uploader.upload(file)
 
-        # Create and save the record to the database
         uploaded_image = SupportPost(
             collum_title=collum_title,
             title=title,
@@ -177,57 +147,12 @@ class SupportPostCreateView(APIView):
         )
         uploaded_image.save()
 
-        # Serialize the data and return the response
         serializer = SupportPostSerializer(uploaded_image)
         return Response({
             'status': 'success',
             'data': serializer.data
         }, status=201)
 
-
-# class SupportPostEditView(APIView):
-#     permission_classes = (AllowAny,)
-#     parser_classes = (MultiPartParser, JSONParser)
-#
-#     def put(self, request):
-#         return self.handle_request(request)
-#
-#     def patch(self, request):
-#         return self.handle_request(request)
-#
-#     def handle_request(self, request):
-#         # Get data from the request
-#         collum_title = request.data.get('collum_title')
-#         title = request.data.get('title')
-#         description = request.data.get('description')
-#         file = request.data.get('picture')
-#
-#         # Check if it's an edit request
-#         instance_id = request.data.get('pk')
-#         if instance_id:
-#             try:
-#                 uploaded_image = SupportPost.objects.get(id=instance_id)
-#             except SupportPost.DoesNotExist:
-#                 return Response({'error': 'Support post not found.'}, status=404)
-#         else:
-#             uploaded_image = SupportPost()
-#
-#         # Upload the image to Cloudinary
-#         upload_data = cloudinary.uploader.upload(file)
-#
-#         # Update or create the record in the database
-#         uploaded_image.collum_title = collum_title
-#         uploaded_image.title = title
-#         uploaded_image.description = description
-#         uploaded_image.image_url = upload_data['url']
-#         uploaded_image.save()
-#
-#         # Serialize the data and return the response
-#         serializer = SupportPostSerializer(uploaded_image)
-#         return Response({
-#             'status': 'success',
-#             'data': serializer.data
-#         }, status=201)
 
 class SupportPostEditView(generics.RetrieveUpdateAPIView):
     queryset = SupportPost.objects.all()
