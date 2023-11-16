@@ -559,8 +559,8 @@ class AffiliateEditOrApprove(APIView):
             affiliate.save()
             if affiliate.approved=='True':
                 affiliate_link = AffiliateLink.objects.create(affiliate=affiliate)
-                hostname = request.get_host()
-                generated_link = f'{hostname}/auth/{affiliate_link.unique_link}'
+                # hostname = request.get_host()
+                generated_link = f'http://app.djangoboiler.xyz/auth/{affiliate_link.unique_link}'
                 if '&lt;link&gt;' in message_text:
                     message_text = message_text.replace('&lt;link&gt;', generated_link)
                 else:
