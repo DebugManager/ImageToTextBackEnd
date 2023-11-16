@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from user.models import CustomUser, Ticket, ChatRoom, ChatMessage, Affiliate, Notification
+from user.models import CustomUser, Ticket, ChatRoom, ChatMessage, Affiliate, Notification, EmailMessage
 from djoser.serializers import UserCreateSerializer
 
 
@@ -107,4 +107,10 @@ class AllAffiliateSerializer(ModelSerializer):
 class AllNotificationSerializer(ModelSerializer):
     class Meta:
         model = Notification
+        fields = ('__all__')
+
+
+class AllEmailMessage(ModelSerializer):
+    class Meta:
+        model = EmailMessage
         fields = ('__all__')
