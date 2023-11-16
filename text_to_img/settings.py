@@ -17,7 +17,6 @@ import dj_database_url
 from dotenv import load_dotenv
 
 
-
 load_dotenv()
 
 import cloudinary
@@ -76,6 +75,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -192,6 +192,7 @@ AUTH_USER_MODEL = 'user.CustomUser'
 #         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
 #     },
 # ]
+
 
 
 # Internationalization

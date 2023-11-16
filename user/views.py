@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 
 import stripe
+from deep_translator import GoogleTranslator
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
@@ -594,6 +595,37 @@ class NotificationCreateList(generics.ListCreateAPIView):
     queryset = Notification.objects.all()
     serializer_class = AllNotificationSerializer
     permission_classes = (AllowAny,)
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        language = request.GET.get('language', None)
+        if language:
+            try:
+                result = []
+                for notif in queryset:
+                    serializer = AllNotificationSerializer(notif)
+                    text = serializer.data["text"]
+                    res = GoogleTranslator(source='en', target=language).translate(text)
+                    result.append({'id': serializer.data["id"], 'text': res, 'data': serializer.data["data"]})
+                print(result)
+                return Response({"message": "translation success", "notifications": result}, status=status.HTTP_200_OK)
+            except Exception:
+
+                result = []
+                for notif in queryset:
+                    serializer = AllNotificationSerializer(notif)
+                    result.append(
+                        {'id': serializer.data["id"], 'text': serializer.data['text'], 'data': serializer.data["data"]})
+                return JsonResponse({"massage": "bad translation", "notifications": result},
+                                    status=status.HTTP_206_PARTIAL_CONTENT)
+        else:
+            result = []
+            for notif in queryset:
+                serializer = AllNotificationSerializer(notif)
+                result.append(
+                    {'id': serializer.data["id"], 'text': serializer.data['text'], 'data': serializer.data["data"]})
+
+            return Response({"massage": "no selected language", "notifications": result}, status=status.HTTP_200_OK)
 
 
 class NotificationMark(APIView):

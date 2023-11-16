@@ -8,6 +8,8 @@ from django.db import models
 from main.models import Company
 from .managers import CustomUserManager
 
+from django.utils.translation import gettext_lazy as _
+
 
 class Affiliate(models.Model):
     user = models.OneToOneField('CustomUser', on_delete=models.CASCADE)
