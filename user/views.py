@@ -599,7 +599,12 @@ class NotificationCreateList(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         language = request.GET.get('language', None)
+
         if language:
+            if language == 'ge':
+                language = 'de'
+            elif language == 'ch':
+                language = 'zh-CN'
             try:
                 result = []
                 for notif in queryset:
@@ -607,10 +612,8 @@ class NotificationCreateList(generics.ListCreateAPIView):
                     text = serializer.data["text"]
                     res = GoogleTranslator(source='en', target=language).translate(text)
                     result.append({'id': serializer.data["id"], 'text': res, 'data': serializer.data["data"]})
-                print(result)
                 return Response({"message": "translation success", "notifications": result}, status=status.HTTP_200_OK)
             except Exception:
-
                 result = []
                 for notif in queryset:
                     serializer = AllNotificationSerializer(notif)
