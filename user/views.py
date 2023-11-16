@@ -24,7 +24,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 
 from user.models import CustomUser, Ticket, ChatRoom, ChatMessage, Affiliate, AffiliateLink, AffiliatedUser, \
-    Notification
+    Notification, EmailMessage
 from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, GrantPermissionSerializer, \
     AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer, ChatRoomSerializer, \
     ChatMessageSerializer, AllNotificationSerializer
@@ -427,9 +427,7 @@ class AffiliateEdit(APIView):
             for field in ['first_name', 'last_name', 'email']:
                 if field in request.data:
                     setattr(user, field, request.data[field])
-            print(user.affiliate_id_id)
             user.affiliate_id_id = affiliate
-            print(user.affiliate_id_id.id)
 
             return Response({'success': AllUserSerializer(user).data})  # affiliate.id})
         except ObjectDoesNotExist as e:
@@ -522,12 +520,28 @@ class ApproveAffiliateView(APIView):
     #         affiliate = Affiliate.objects.get(id=affiliate_id)
 
 
+class CreateEmailMessage(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        queryset = EmailMessage.objects.all()
+        queryset.delete()
+        EmailMessage.objects.create(message=request.data.get('message'))
+        return Response({'status': 'created'})
+
+
 class AffiliateEditOrApprove(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
         try:
             affiliate_id = request.data.get('affiliate_id')
+            message = EmailMessage.objects.all().first()
+            if message:
+                print(message)
+                message_text = message.message
+            else:
+                message_text = ''
             affiliate = Affiliate.objects.get(id=affiliate_id)
 
             if 'first_name' in request.data:
@@ -543,18 +557,22 @@ class AffiliateEditOrApprove(APIView):
 
             affiliate.user.save()
             affiliate.save()
-            if affiliate.approved:
+            if affiliate.approved=='True':
                 affiliate_link = AffiliateLink.objects.create(affiliate=affiliate)
                 hostname = request.get_host()
                 generated_link = f'{hostname}/auth/{affiliate_link.unique_link}'
-                print(generated_link)
+                if '&lt;link&gt;' in message_text:
+                    message_text = message_text.replace('&lt;link&gt;', generated_link)
+                else:
+                    message_text += f'it is your unique link:\t{generated_link}\n'
 
                 send_mail(
                     subject='Affiliate Approval',
-                    message=f'Congratulations! Your affiliate account has been approved. Follow this link to sign up: {generated_link}',
+                    message=f'{generated_link}',
                     from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
                     recipient_list=[affiliate.user.email],  # List of recipient emails
                     fail_silently=False,
+                    html_message=message_text
                 )
             return Response({'success': 200})
         except ObjectDoesNotExist as e:
