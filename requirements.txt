@@ -57,3 +57,4 @@ watchdog
 whitenoise
 stripe
 drf-yasg
+deep_translator
