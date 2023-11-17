@@ -1,3 +1,5 @@
+import re
+
 import cloudinary.uploader
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -142,6 +144,9 @@ class SupportPostCreateView(APIView):
             description=description,
         )
         if file:
+            pattern = r'<img[^>]*\ssrc=["\'](.*?)["\']'
+            matches = re.findall(pattern, file)
+            file = matches[0]
             upload_image = cloudinary.uploader.upload(file)
             uploaded_post.image_url = upload_image['url']
 
