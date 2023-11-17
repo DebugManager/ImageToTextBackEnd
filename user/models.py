@@ -22,7 +22,7 @@ class Affiliate(models.Model):
     paypal_email = models.CharField(max_length=100, blank=True, null=True)
     btc_adress = models.CharField(max_length=255, blank=True, null=True)
     affiliated_users = models.ManyToManyField('CustomUser', related_name='affiliate_membership')
-    approved = models.BooleanField(default=False)
+    approved = models.CharField(max_length=100, default='Pending')
     created = models.DateTimeField(auto_now_add=True)
 
 
@@ -128,4 +128,6 @@ class ChatMessage(models.Model):
 
 
 class EmailMessage(models.Model):
+    event = models.CharField(max_length=100)
     message = models.TextField()
+
