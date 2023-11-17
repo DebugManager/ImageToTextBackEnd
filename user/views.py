@@ -138,7 +138,7 @@ class CustomUserCreateView(CreateAPIView):
                 from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
                 recipient_list=[user.email],
                 fail_silently=False,
-                html_message=message
+                html_message=message.message
             )
 
             response_data = {
@@ -193,7 +193,6 @@ class UserList(generics.ListCreateAPIView):
         user_type = 'admin' if is_superuser else ('staff' if is_staff else 'customer')
         serializer.validated_data['type'] = user_type
         serializer.save()
-
 
 
 class UserRoleList(generics.ListCreateAPIView):
