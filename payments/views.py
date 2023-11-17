@@ -2,6 +2,8 @@ import json
 import os
 from datetime import datetime
 
+from bs4 import BeautifulSoup
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -14,7 +16,7 @@ from rest_framework import status
 from django.conf import settings
 import stripe
 
-from user.models import CustomUser
+from user.models import CustomUser, EmailMessage
 from user.serializers import AllUserSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -315,6 +317,31 @@ class ProcessPaymentView(View):
                 self.update_subscription_id_in_db(customer=customer, new_subscription_id=subscription.id)
             else:
                 self.update_subscription_id_in_db(customer=customer, new_subscription_id=subscription.id)
+
+            if payment_intent:
+                # hostname = request.get_host()
+                message = EmailMessage.objects.filter(event='order_confirm').first()
+                subject = ''
+                if message:
+                    message_text = message.message
+                else:
+                    message_text = ''
+                soup = BeautifulSoup(message_text, 'html.parser')
+                subject_tag = soup.find('subject')
+                link = 'http://app.djangoboiler.xyz'
+                if subject_tag:
+                    text_inside_subject = subject_tag.get_text(strip=True)
+                else:
+                    text_inside_subject = 'Your order'
+
+                send_mail(
+                    subject=subject_tag,
+                    message=f'{link}',
+                    from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
+                    recipient_list=[customer.email],
+                    fail_silently=False,
+                    html_message=message_text
+                )
 
             return JsonResponse({'success': True, 'intent': payment_intent, 'subscription': subscription})
         except stripe.error.CardError as e:
