@@ -16,6 +16,15 @@ class CustomPasswordResetEmail(PasswordResetEmail):
 
         message = EmailMessage.objects.filter(event='reset_password').first()
         subject = message.subject
+        reset_url = context['url']
+        if message:
+            message_text = message.message
+        else:
+            message_text = ''
+        if '&lt;link&gt;' in message:
+            message_text = message.replace('&lt;link&gt;', reset_url)
+        else:
+            message_text += f'it is your unique link:\t{reset_url}\n'
 
         send_mail(
             subject=subject,
@@ -23,7 +32,7 @@ class CustomPasswordResetEmail(PasswordResetEmail):
             from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
             recipient_list=[*to],
             fail_silently=False,
-            html_message=message.message,
+            html_message=message_text,
         )
 
     def get_context_data(self):
