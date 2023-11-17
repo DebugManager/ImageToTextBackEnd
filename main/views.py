@@ -137,17 +137,18 @@ class SupportPostCreateView(APIView):
         description = request.data.get('description')
         file = request.data.get('picture')
 
-        upload_data = cloudinary.uploader.upload(file)
-
-        uploaded_image = SupportPost(
+        uploaded_post = SupportPost(
             collum_title=collum_title,
             title=title,
             description=description,
-            image_url=upload_data['url']
         )
-        uploaded_image.save()
+        if file:
+            upload_image = cloudinary.uploader.upload(file)
+            uploaded_post.image_url = upload_image['url']
 
-        serializer = SupportPostSerializer(uploaded_image)
+        uploaded_post.save()
+
+        serializer = SupportPostSerializer(uploaded_post)
         return Response({
             'status': 'success',
             'data': serializer.data
