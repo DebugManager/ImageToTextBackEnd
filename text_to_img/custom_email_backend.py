@@ -24,7 +24,7 @@ class CustomPasswordResetEmail(PasswordResetEmail):
         if '&lt;link&gt;' in message_text:
             message_text = message.replace('&lt;link&gt;', f'http://app.djangoboiler.xyz/{reset_url}')
         else:
-            message_text += f'it is your unique link:\t{reset_url}\n'
+            message_text += f'it is your unique link:\thttp://app.djangoboiler.xyz/{reset_url}\n'
 
         send_mail(
             subject=subject,
