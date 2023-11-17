@@ -1,3 +1,4 @@
+import base64
 import re
 
 import cloudinary.uploader
@@ -144,10 +145,11 @@ class SupportPostCreateView(APIView):
             description=description,
         )
         if file:
-            pattern = r'<img[^>]*\ssrc=["\'](.*?)["\']'
-            matches = re.findall(pattern, description)
-            file = matches[0]
-            upload_image = cloudinary.uploader.upload(file)
+            # pattern = r'<img[^>]*\ssrc=["\'](.*?)["\']'
+            # matches = re.findall(pattern, description)
+            # file = matches[0]
+            decoded_data = base64.b64decode(file)
+            upload_image = cloudinary.uploader.upload(decoded_data)
             uploaded_post.image_url = upload_image['url']
 
         uploaded_post.save()
