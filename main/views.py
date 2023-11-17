@@ -145,9 +145,6 @@ class SupportPostCreateView(APIView):
             description=description,
         )
         if file:
-            # pattern = r'<img[^>]*\ssrc=["\'](.*?)["\']'
-            # matches = re.findall(pattern, description)
-            # file = matches[0]
             parts = file.split(',')
             file = parts[1]
             decoded_data = base64.b64decode(file)
@@ -209,7 +206,6 @@ class TicketDetail(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
 
         if 'picture' in request.data:
-            print(request.data['picture'])
             file = request.data['picture']
             upload_data = cloudinary.uploader.upload(file)
             request.data['image_url'] = upload_data['url']
