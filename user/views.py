@@ -570,14 +570,14 @@ class AffiliateEditOrApprove(APIView):
                 else:
                     message_text += f'it is your unique link:\t{generated_link}\n'
 
-                    send_mail(
-                        subject=subject,
-                        message=f'{generated_link}',
-                        from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
-                        recipient_list=[affiliate.user.email],  # List of recipient emails
-                        fail_silently=False,
-                        html_message=message_text
-                    )
+                send_mail(
+                    subject=subject,
+                    message=f'{generated_link}',
+                    from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
+                    recipient_list=[affiliate.user.email],  # List of recipient emails
+                    fail_silently=False,
+                    html_message=message_text
+                )
 
             else:
                 message = EmailMessage.objects.filter(event='affiliate_decline').first()
