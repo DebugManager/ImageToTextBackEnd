@@ -14,7 +14,7 @@ class CustomPasswordResetEmail(PasswordResetEmail):
     def send(self, to, *args, **kwargs):
         context = self.get_context_data()
 
-        message = EmailMessage.objects.filter(event='reset_pasword').first()
+        message = EmailMessage.objects.filter(event='reset_password').first()
         subject = message.subject
 
         send_mail(
