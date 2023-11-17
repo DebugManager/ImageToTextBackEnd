@@ -2,6 +2,7 @@ import base64
 import re
 
 import cloudinary.uploader
+from deep_translator import GoogleTranslator
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, filters
@@ -11,7 +12,7 @@ from rest_framework.views import APIView
 
 from main.models import CompanyDoc, Company, Plan, SupportPost
 from main.serializers import CompanyDocSerializer, CompanySerializer, PlanSerializer, FeatureVoteSerializer, \
-    SupportPostSerializer, TicketSerializer
+    SupportPostSerializer, TicketSerializer, TitleCollumTitleSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -122,12 +123,45 @@ class FeatureUnvoteView(APIView):
             return Response({'error': 'Feature not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class SupportPostGetAllView(generics.ListAPIView):
+class SupportPostGetAllView(APIView):
     permission_classes = (AllowAny,)
-    queryset = SupportPost.objects.all()
-    serializer_class = SupportPostSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['collum_title']
+
+    # queryset = SupportPost.objects.all()
+    # serializer_class = SupportPostSerializer
+    # filter_backends = [filters.SearchFilter]
+    # search_fields = ['collum_title']
+
+    def get(self, request):
+        language = request.GET.get('language', None)
+        queryset = SupportPost.objects.all()
+
+        if language:
+            if language == 'ge':
+                language = 'de'
+            elif language == 'ch':
+                language = 'zh-CN'
+            try:
+                result = []
+                for post in queryset:
+                    serializer = TitleCollumTitleSerializer(post)
+                    collum_title = serializer.data['collum_title']
+                    title = serializer.data['title']
+
+                    collum_title = GoogleTranslator(source='en', target=language).translate(collum_title)
+                    title = GoogleTranslator(source='en', target=language).translate(title)
+                    result.append(
+                        {'id': serializer.data["id"], 'collum_title': collum_title,
+                         'title': title})
+                return Response({"message": "translation success", "notifications": result}, status=status.HTTP_200_OK)
+            except Exception:
+                result = []
+                for notif in queryset:
+                    serializer = TitleCollumTitleSerializer(notif)
+                    result.append(
+                        {'id': serializer.data["id"], 'collum_title': serializer.data['collum_title'],
+                         'title': serializer.data["title"]})
+                return Response({"massage": "bad translation", "notifications": result},
+                                status=status.HTTP_206_PARTIAL_CONTENT)
 
 
 class SupportPostCreateView(APIView):
@@ -211,4 +245,3 @@ class TicketDetail(generics.RetrieveUpdateDestroyAPIView):
             request.data['image_url'] = upload_data['url']
 
         return super().update(request, *args, **kwargs)
-
