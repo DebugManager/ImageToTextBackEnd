@@ -18,7 +18,7 @@ from djoser.views import TokenCreateView
 from djoser.views import UserViewSet
 from dotenv import load_dotenv
 
-from bs4 import BeautifulSoup
+import re
 
 from rest_framework import generics, status, filters
 from rest_framework.generics import get_object_or_404, CreateAPIView
@@ -530,7 +530,7 @@ class CreateEmailMessage(APIView):
         event = request.data.get('event')
         queryset = EmailMessage.objects.filter(event=event)
         queryset.delete()
-        EmailMessage.objects.create(message=request.data.get('message'), event=event)
+        EmailMessage.objects.create(message=request.data.get('message'), event=event, subject=request.data.get('subject'))
         return Response({'status': 'created'})
 
 
@@ -541,6 +541,7 @@ class AffiliateEditOrApprove(APIView):
         try:
             affiliate_id = request.data.get('affiliate_id')
             message = EmailMessage.objects.filter(event='affiliate_accept').first()
+            subject = message.subject
             if message:
                 message_text = message.message
             else:
@@ -568,17 +569,9 @@ class AffiliateEditOrApprove(APIView):
                     message_text = message_text.replace('&lt;link&gt;', generated_link)
                 else:
                     message_text += f'it is your unique link:\t{generated_link}\n'
-                # message_text = '''<p><span style="font-size: 18pt; font-family: 'arial black', sans-serif;">&lt;subject&gt; <span style="font-family: 'comic sans ms', sans-serif;">Hawdsa dsa dsa ds a sa</span>&lt;/subject&gt;</span></p>'''
-                soup = BeautifulSoup(message_text, 'html.parser')
-                subject_tag = soup.find('subject')
-
-                if subject_tag:
-                    text_inside_subject = subject_tag.get_text(strip=True)
-                else:
-                    text_inside_subject = 'Affiliate Approval'
 
                     send_mail(
-                        subject=text_inside_subject,
+                        subject=subject,
                         message=f'{generated_link}',
                         from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
                         recipient_list=[affiliate.user.email],  # List of recipient emails
@@ -588,26 +581,20 @@ class AffiliateEditOrApprove(APIView):
 
             else:
                 message = EmailMessage.objects.filter(event='affiliate_decline').first()
+                subject = message.subject
                 if message:
                     message_text = message.message
                 else:
                     message_text = ''
-                soup = BeautifulSoup(message_text, 'html.parser')
-                subject_tag = soup.find('subject')
 
-                if subject_tag:
-                    text_inside_subject = subject_tag.get_text(strip=True)
-                else:
-                    text_inside_subject = 'Affiliate Decline'
-
-                    send_mail(
-                        subject=text_inside_subject,
-                        message=f'',
-                        from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
-                        recipient_list=[affiliate.user.email],  # List of recipient emails
-                        fail_silently=False,
-                        html_message=message_text
-                    )
+                send_mail(
+                    subject=subject,
+                    message=f'',
+                    from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
+                    recipient_list=[affiliate.user.email],  # List of recipient emails
+                    fail_silently=False,
+                    html_message=message_text,
+                )
             return Response({'success': 200})
         except ObjectDoesNotExist as e:
             return Response({'error': f'Object not found: {str(e)}'}, status=404)

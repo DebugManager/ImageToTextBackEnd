@@ -129,5 +129,6 @@ class ChatMessage(models.Model):
 
 class EmailMessage(models.Model):
     event = models.CharField(max_length=100)
+    subject = models.CharField(max_length=255)
     message = models.TextField()
 
