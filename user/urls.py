@@ -1,6 +1,6 @@
 from django.urls import path, include, re_path
 
-
+from main.views import TicketDetail
 from user.views import CustomTokenCreateView, GrantPermissionView, UserRoleList, \
     CreateUserAndGrantPermissionView, UpdateUserAndPermissionsView, UserDetail, AllUsersForAdminView, \
     DetailUserForAdminView, AllTicketForAdminView, PersonalInfoUpdade, ChatRoomListCreateView, ChatRoomDetailView, \
