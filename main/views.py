@@ -149,7 +149,10 @@ class SupportPostCreateView(APIView):
             # matches = re.findall(pattern, description)
             # file = matches[0]
             decoded_data = base64.b64decode(file)
+            with open("decoded_image.jpg", "wb") as f:
+                f.write(decoded_data)
             upload_image = cloudinary.uploader.upload(decoded_data)
+
             uploaded_post.image_url = upload_image['url']
 
         uploaded_post.save()
