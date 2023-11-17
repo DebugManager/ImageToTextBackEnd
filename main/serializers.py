@@ -38,3 +38,9 @@ class TicketSerializer(ModelSerializer):
     class Meta:
         model = Ticket
         fields = '__all__'
+
+
+class TitleCollumTitleSerializer(ModelSerializer):
+    class Meta:
+        model = SupportPost
+        fields = ('id', 'collum_title', 'title')
