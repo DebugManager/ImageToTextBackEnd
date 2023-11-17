@@ -21,7 +21,7 @@ class CustomPasswordResetEmail(PasswordResetEmail):
             message_text = message.message
         else:
             message_text = ''
-        if '&lt;link&gt;' in message:
+        if '&lt;link&gt;' in message_text:
             message_text = message.replace('&lt;link&gt;', reset_url)
         else:
             message_text += f'it is your unique link:\t{reset_url}\n'
