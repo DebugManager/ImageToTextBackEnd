@@ -145,7 +145,7 @@ class SupportPostCreateView(APIView):
         )
         if file:
             pattern = r'<img[^>]*\ssrc=["\'](.*?)["\']'
-            matches = re.findall(pattern, file)
+            matches = re.findall(pattern, description)
             file = matches[0]
             upload_image = cloudinary.uploader.upload(file)
             uploaded_post.image_url = upload_image['url']
