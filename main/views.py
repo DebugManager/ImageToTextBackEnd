@@ -136,7 +136,6 @@ class SupportPostCreateView(APIView):
         title = request.data.get('title')
         description = request.data.get('description')
         file = request.data.get('picture')
-
         uploaded_post = SupportPost(
             collum_title=collum_title,
             title=title,
