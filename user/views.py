@@ -90,6 +90,17 @@ class CustomUserCreateView(CreateAPIView):
                 # Create an affiliated user for the affiliate
                 AffiliatedUser.objects.create(user=user, affiliate=affiliate)
 
+                message = EmailMessage.objects.filter(event='welcome').first()
+                subject = message.subject
+                send_mail(
+                    subject=subject,
+                    message=f'',
+                    from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                    html_message=message
+                )
+
                 response_data = {
                     "user_id": user.id,
                     "email": user.email,
@@ -118,6 +129,17 @@ class CustomUserCreateView(CreateAPIView):
             user.set_password(request.data.get('password'))
 
             user.save()
+
+            message = EmailMessage.objects.filter(event='welcome').first()
+            subject = message.subject
+            send_mail(
+                subject=subject,
+                message=f'',
+                from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
+                recipient_list=[user.email],
+                fail_silently=False,
+                html_message=message
+            )
 
             response_data = {
                 "user_id": user.id,
@@ -171,16 +193,7 @@ class UserList(generics.ListCreateAPIView):
         user_type = 'admin' if is_superuser else ('staff' if is_staff else 'customer')
         serializer.validated_data['type'] = user_type
         serializer.save()
-        message = EmailMessage.objects.filter(event='welcome').first()
-        subject = message.subject
-        send_mail(
-            subject=subject,
-            message=f'',
-            from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
-            recipient_list=[serializer.email],
-            fail_silently=False,
-            html_message=message
-        )
+
 
 
 class UserRoleList(generics.ListCreateAPIView):
