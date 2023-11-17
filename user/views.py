@@ -587,6 +587,11 @@ class AffiliateEditOrApprove(APIView):
                     )
 
             else:
+                message = EmailMessage.objects.filter(event='affiliate_decline').first()
+                if message:
+                    message_text = message.message
+                else:
+                    message_text = ''
                 soup = BeautifulSoup(message_text, 'html.parser')
                 subject_tag = soup.find('subject')
 
