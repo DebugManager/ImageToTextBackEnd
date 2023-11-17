@@ -321,21 +321,15 @@ class ProcessPaymentView(View):
             if payment_intent:
                 # hostname = request.get_host()
                 message = EmailMessage.objects.filter(event='order_confirm').first()
-                subject = ''
+                subject = message.subject
                 if message:
                     message_text = message.message
                 else:
                     message_text = ''
-                soup = BeautifulSoup(message_text, 'html.parser')
-                subject_tag = soup.find('subject')
                 link = 'http://app.djangoboiler.xyz'
-                if subject_tag:
-                    text_inside_subject = subject_tag.get_text(strip=True)
-                else:
-                    text_inside_subject = 'Your order'
 
                 send_mail(
-                    subject=subject_tag,
+                    subject=subject,
                     message=f'{link}',
                     from_email=os.environ.get('DEFAULT_FROM_EMAIL'),
                     recipient_list=[customer.email],
