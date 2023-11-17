@@ -148,6 +148,8 @@ class SupportPostCreateView(APIView):
             # pattern = r'<img[^>]*\ssrc=["\'](.*?)["\']'
             # matches = re.findall(pattern, description)
             # file = matches[0]
+            parts = file.split(',')
+            file = parts[1]
             decoded_data = base64.b64decode(file)
             with open("decoded_image.jpg", "wb") as f:
                 f.write(decoded_data)
