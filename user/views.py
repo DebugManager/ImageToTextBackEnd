@@ -32,7 +32,7 @@ from user.serializers import CustomUserUpdateSerializer, AllUserSerializer, Gran
     AllUserForAdminSerializer, UserForAdminUpdateSerializer, TicketForAdminSerializer, ChatRoomSerializer, \
     ChatMessageSerializer, AllNotificationSerializer
 
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 
 load_dotenv()
 
@@ -364,7 +364,7 @@ class UpdateUserAndPermissionsView(generics.UpdateAPIView):
 class AllUsersForAdminView(generics.ListCreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AllUserForAdminSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser,)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['email', 'first_name', 'last_name']
     ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name', 'type']
@@ -373,13 +373,13 @@ class AllUsersForAdminView(generics.ListCreateAPIView):
 class DetailUserForAdminView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserForAdminUpdateSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser,)
 
 
 class AllTicketForAdminView(generics.ListCreateAPIView):
     queryset = Ticket.objects.all()
     serializer_class = TicketForAdminSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser,)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['subject', 'website', 'description']
     ordering_fields = ['website', 'site_code', 'id', 'user__first_name', 'user__last_name', 'user__email', 'status',
@@ -462,7 +462,7 @@ class AffiliateEdit(APIView):
 
 
 class AffiliateListView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser,)
 
     def get(self, request):
         affiliates = Affiliate.objects.all()
@@ -546,7 +546,7 @@ class ApproveAffiliateView(APIView):
 
 
 class CreateEmailMessage(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser,)
 
     def post(self, request):
         event = request.data.get('event')
@@ -557,7 +557,7 @@ class CreateEmailMessage(APIView):
 
 
 class AffiliateEditOrApprove(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser,)
 
     def post(self, request):
         try:
@@ -669,7 +669,7 @@ class AffiliateEditOrApprove(APIView):
 
 
 class GetAffiliateById(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser,)
 
     def post(self, request):
         affiliate_id = request.data.get('affiliate_id')
