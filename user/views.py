@@ -54,6 +54,22 @@ class CustomTokenCreateView(TokenCreateView):
         )
 
 
+class CustomTokenCreateViewForAdmin(TokenCreateView):
+    def _action(self, serializer):
+        token = utils.login_user(self.request, serializer.user)
+        token_serializer_class = settings.SERIALIZERS.token
+        if AllUserSerializer(serializer.user).data.is_superuser:
+            data = {
+                'token': token_serializer_class(token).data,
+                'user': AllUserSerializer(serializer.user).data
+            }
+            return Response(
+                data=data, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(data="Something goes wrong", status=status.HTTP_418_IM_A_TEAPOT)
+
+
 class CustomUserCreateView(CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AllUserSerializer
@@ -552,7 +568,8 @@ class CreateEmailMessage(APIView):
         event = request.data.get('event')
         queryset = EmailMessage.objects.filter(event=event)
         queryset.delete()
-        EmailMessage.objects.create(message=request.data.get('message'), event=event, subject=request.data.get('subject'))
+        EmailMessage.objects.create(message=request.data.get('message'), event=event,
+                                    subject=request.data.get('subject'))
         return Response({'status': 'created'})
 
 
