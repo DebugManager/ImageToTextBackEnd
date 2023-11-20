@@ -471,6 +471,13 @@ class InvoiceTable(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
 
+        filter_mappings = {'method': 'method', 'package': 'name', 'status': 'status'}
+
+        for filter_param, data_key in filter_mappings.items():
+            filter_value = request.GET.get(filter_param)
+            if filter_value:
+                invoices = [inv for inv in invoices if inv[data_key] == filter_value]
+
         sort_field = request.GET.get('sort')
         if sort_field in ['id', 'amount', 'created_date', 'paid_date', 'name', 'method', 'status']:
             invoices.sort(key=lambda x: x[sort_field])
@@ -532,6 +539,14 @@ class OrderView(APIView):
                 ]
             else:
                 filtered_orders = orders
+
+        filter_mappings = {'status': 'status', 'country': 'country', 'affiliate': 'affiliate_code'}
+
+        # Apply filters
+        for filter_param, data_key in filter_mappings.items():
+            filter_value = request.GET.get(filter_param)
+            if filter_value:
+                orders = [order for order in orders if str(order[data_key]).lower() == filter_value.lower()]
 
         sort_field = request.GET.get('sort')
         if sort_field in ['id', 'first_name', 'last_name', 'email', 'package', 'affiliate_code', 'address', 'price',
