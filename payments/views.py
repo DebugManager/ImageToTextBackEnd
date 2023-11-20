@@ -1,8 +1,10 @@
 import json
 import os
+import time
 from datetime import datetime
 
 from bs4 import BeautifulSoup
+from deep_translator import GoogleTranslator
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -22,6 +24,15 @@ from user.serializers import AllUserSerializer
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+def translate_list_of_features(features, target_language):
+    translated_features = []
+    for feature in features:
+        name = feature.get('name', '')
+        translated_name = GoogleTranslator(source='auto', target=target_language).translate(name)
+        translated_features.append({'name': translated_name})
+    return translated_features
+
+
 class GetConfigView(APIView):
     permission_classes = (AllowAny,)
 
@@ -31,39 +42,73 @@ class GetConfigView(APIView):
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
+            language = request.GET.get('language', None)
+
+            if language:
+                if language == 'ge':
+                    language = 'de'
+                elif language == 'ch':
+                    language = 'zh-CN'
+
             params = {}
             if interval:
                 params['recurring[interval]'] = interval
 
             prices = stripe.Price.list(**params)
-
             serialized_prices = []
             for price in prices:
                 product_name = stripe.Product.retrieve(id=price.product)
                 if product_name.active:
-                    serialized_prices.append({
-                        'id': price.id,
-                        'object': price.object,
-                        'active': price.active,
-                        'billing_scheme': price.billing_scheme,
-                        'created': price.created,
-                        'custom_unit_amount': price.custom_unit_amount,
-                        'livemode': price.livemode,
-                        'lookup_key': price.lookup_key,
-                        'metadata': price.metadata,
-                        'nickname': price.nickname,
-                        'product': price.product,
-                        'currency': price.currency,
-                        'recurring': price.recurring,
-                        'tax_behavior': price.tax_behavior,
-                        'tiers_mode': price.tiers_mode,
-                        'transform_quantity': price.transform_quantity,
-                        'type': price.type,
-                        'unit_amount': price.unit_amount,
-                        'unit_amount_decimal': price.unit_amount_decimal,
-                        'product_name': product_name.name,
-                        'options': product_name.features,
-                    })
+                    if language:
+                        serialized_prices.append({
+                            'id': price.id,
+                            'object': price.object,
+                            'active': price.active,
+                            'billing_scheme': price.billing_scheme,
+                            'created': price.created,
+                            'custom_unit_amount': price.custom_unit_amount,
+                            'livemode': price.livemode,
+                            'lookup_key': price.lookup_key,
+                            'metadata': price.metadata,
+                            'nickname': price.nickname,
+                            'product': price.product,
+                            'currency': price.currency,
+                            'recurring': price.recurring,
+                            'tax_behavior': price.tax_behavior,
+                            'tiers_mode': price.tiers_mode,
+                            'transform_quantity': price.transform_quantity,
+                            'type': price.type,
+                            'unit_amount': price.unit_amount,
+                            'unit_amount_decimal': price.unit_amount_decimal,
+                            'product_name': GoogleTranslator(source='en', target=language).translate(
+                                product_name.name),
+                            'options': translate_list_of_features(product_name.features, language),
+                        })
+
+                    else:
+                        serialized_prices.append({
+                            'id': price.id,
+                            'object': price.object,
+                            'active': price.active,
+                            'billing_scheme': price.billing_scheme,
+                            'created': price.created,
+                            'custom_unit_amount': price.custom_unit_amount,
+                            'livemode': price.livemode,
+                            'lookup_key': price.lookup_key,
+                            'metadata': price.metadata,
+                            'nickname': price.nickname,
+                            'product': price.product,
+                            'currency': price.currency,
+                            'recurring': price.recurring,
+                            'tax_behavior': price.tax_behavior,
+                            'tiers_mode': price.tiers_mode,
+                            'transform_quantity': price.transform_quantity,
+                            'type': price.type,
+                            'unit_amount': price.unit_amount,
+                            'unit_amount_decimal': price.unit_amount_decimal,
+                            'product_name': product_name.name,
+                            'options': product_name.features,
+                        })
 
             return Response({
                 'publishableKey': settings.STRIPE_PUBLISHABLE_KEY,
