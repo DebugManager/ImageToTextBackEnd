@@ -384,6 +384,7 @@ class AllUsersForAdminView(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['email', 'first_name', 'last_name']
     ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name', 'type']
+    filterset_fields = ['status', 'country', 'affiliate_id']
 
 
 class DetailUserForAdminView(generics.RetrieveUpdateDestroyAPIView):
@@ -401,6 +402,7 @@ class AllTicketForAdminView(generics.ListCreateAPIView):
     ordering_fields = ['website', 'site_code', 'id', 'user__first_name', 'user__last_name', 'user__email', 'status',
                        'user_id']
     filterset_class = DateRangeFilter
+    filterset_field = ['status']
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -536,6 +538,15 @@ class AffiliateListView(APIView):
         if sort_field in ['first_name', 'last_name', 'email', 'users_signed_up', 'sales', 'commission', 'status',
                           'country']:
             filtered_affiliate_user.sort(key=lambda x: x[sort_field])
+
+        filter_mappings = {'status': 'status', 'country': 'country'}
+
+        # Apply filters
+        for filter_param, data_key in filter_mappings.items():
+            filter_value = request.GET.get(filter_param)
+            if filter_value:
+                affiliate_data = [affiliate for affiliate in affiliate_data if
+                                  str(affiliate[data_key]).lower() == filter_value.lower()]
 
         return JsonResponse({'affiliates': filtered_affiliate_user})
 

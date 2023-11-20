@@ -219,9 +219,10 @@ class TicketList(generics.ListCreateAPIView):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
     permission_classes = (AllowAny,)
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     search_fields = ['subject']
     ordering_fields = ['id', 'subject', 'created', 'status']
+    filterset_fields = ['status']
 
     def perform_create(self, serializer):
         file = self.request.data.get('picture')
