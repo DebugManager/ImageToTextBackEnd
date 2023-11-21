@@ -217,6 +217,7 @@ class UserRoleList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['email', 'first_name', 'last_name']
     ordering_fields = ['role', 'company', 'joined', 'last_login', 'first_name', 'last_name']
+    filterset_fields = ['type']
 
     def list(self, request, *args, **kwargs):
         users = CustomUser.objects.all()
